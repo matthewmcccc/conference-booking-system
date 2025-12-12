@@ -11,7 +11,6 @@ app.use(express.json());
 const WEATHER_SERVICE_URL = process.env.WEATHER_SERVICE_URL || 'http://weather-service:8080'
 const LOCATION_SERVICE_URL = process.env.LOCATION_SERVICE_URL ||  'http://location-service:8081'
 
-
 app.use('/api/locations', createProxyMiddleware({
     target: LOCATION_SERVICE_URL,
     changeOrigin: true,
