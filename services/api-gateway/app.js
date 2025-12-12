@@ -8,18 +8,20 @@ const cors = require('cors');
 app.use(cors());
 app.use(express.json());
 
-const WEATHER_SERVICE_URL = 'http://weather-service:3001'
-const LOCATION_SERVICE_URL = 'http://location-service:3000'
+const WEATHER_SERVICE_URL = process.env.WEATHER_SERVICE_URL || 'http://weather-service:8080'
+const LOCATION_SERVICE_URL = process.env.LOCATION_SERVICE_URL ||  'http://location-service:8081'
 
 
 app.use('/api/locations', createProxyMiddleware({
     target: LOCATION_SERVICE_URL,
-    changeOrigin: true
+    changeOrigin: true,
+    pathRewrite: {'^/api/locations': ''}
 }))
 
 app.use('/api/weather', createProxyMiddleware({
     target: WEATHER_SERVICE_URL,
-    changeOrigin: true
+    changeOrigin: true,
+    pathRewrite: {'^/api/weather': ''}
 }))
 
 app.listen(PORT, () => {

@@ -11,5 +11,5 @@ app.use('/api/locations', locationRoutes);
 
 
 app.listen(PORT, () => {
-    console.log(`Location service running on port: ${PORT}`);
+    console.log(`Location service running on: ${PORT}`);
 })

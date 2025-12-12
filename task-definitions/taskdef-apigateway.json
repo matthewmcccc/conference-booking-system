@@ -1,17 +1,18 @@
 {
   "containerDefinitions": [{
-    "name": "location-service",
-    "image": "449591255785.dkr.ecr.eu-west-1.amazonaws.com/location-service",
+    "name": "api-gateway",
+    "image": "449591255785.dkr.ecr.eu-west-1.amazonaws.com/api-gateway",
     "environment": [
-      {"name": "MONGODB_URL", "value": "mongodb+srv://user:pass@cluster.mongodb.net/conference"},
-      {"name": "PORT", "value": "3001"}
+      {"name": "WEATHER_SERVICE_URL", "value": "http://3.249.244.148:8080"},
+      {"name": "LOCATION_SERVICE_URL", "value": "http://54.220.81.93:8081"},
+      {"name": "PORT", "value": "8082"}
     ],
-    "portMappings": [{"containerPort": 3001, "protocol": "tcp"}],
+    "portMappings": [{"containerPort": 8082, "protocol": "tcp"}],
     "essential": true,
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
-        "awslogs-group": "/ecs/location-service",
+        "awslogs-group": "/ecs/api-gateway",
         "awslogs-region": "eu-west-1",
         "awslogs-stream-prefix": "ecs"
       }
@@ -22,5 +23,5 @@
   "cpu": "256",
   "memory": "512",
   "executionRoleArn": "arn:aws:iam::449591255785:role/ecsTaskExecutionRole",
-  "family": "location-service"
+  "family": "api-gateway"
 }
