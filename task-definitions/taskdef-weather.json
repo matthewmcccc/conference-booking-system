@@ -1,0 +1,25 @@
+{
+  "containerDefinitions": [{
+    "name": "location-service",
+    "image": "449591255785.dkr.ecr.eu-west-1.amazonaws.com/weather-service",
+    "environment": [
+      {"name": "PORT", "value": "3000"}
+    ],
+    "portMappings": [{"containerPort": 3000, "protocol": "tcp"}],
+    "essential": true,
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/weather-service",
+        "awslogs-region": "eu-west-1",
+        "awslogs-stream-prefix": "ecs"
+      }
+    }
+  }],
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::449591255785:role/ecsTaskExecutionRole",
+  "family": "weather-service"
+}

@@ -1,0 +1,26 @@
+{
+  "containerDefinitions": [{
+    "name": "location-service",
+    "image": "449591255785.dkr.ecr.eu-west-1.amazonaws.com/location-service",
+    "environment": [
+      {"name": "MONGODB_URL", "value": "mongodb+srv://user:pass@cluster.mongodb.net/conference"},
+      {"name": "PORT", "value": "3001"}
+    ],
+    "portMappings": [{"containerPort": 3001, "protocol": "tcp"}],
+    "essential": true,
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/location-service",
+        "awslogs-region": "eu-west-1",
+        "awslogs-stream-prefix": "ecs"
+      }
+    }
+  }],
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::449591255785:role/ecsTaskExecutionRole",
+  "family": "location-service"
+}
