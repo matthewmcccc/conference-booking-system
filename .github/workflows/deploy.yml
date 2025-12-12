@@ -13,89 +13,71 @@ permissions:
   contents: read
 
 jobs:
-  weather-service:
-    name: Weather Service
+  deploy-services:
+    name: Deploy Services
     runs-on: ubuntu-latest
-    
+    strategy:
+      matrix:
+        service: [weather-service, location-service]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+      
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
-      - name: Build and push weather-service
+      
+      - name: Build and push ${{ matrix.service }}
         run: |
-          cd services/weather-service
-          docker build --platform linux/amd64 -t weather-service .
-          docker tag weather-service:latest $ECR_REGISTRY/weather-service:latest
-          docker push $ECR_REGISTRY/weather-service:latest
-      - name: Force ECS deployment - weather-service
+          cd services/${{ matrix.service }}
+          docker build --platform linux/amd64 -t ${{ matrix.service }} .
+          docker tag ${{ matrix.service }}:latest $ECR_REGISTRY/${{ matrix.service }}:latest
+          docker push $ECR_REGISTRY/${{ matrix.service }}:latest
+      
+      - name: Force ECS deployment
         run: |
           aws ecs update-service \
             --cluster $ECS_CLUSTER \
-            --service weather-service \
+            --service ${{ matrix.service }} \
             --force-new-deployment \
             --region $AWS_REGION
   
-  location-service:
-    name: Location Service
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
-      - name: Login to Amazon ECR
-        run: |
-          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
-      - name: Build and push location-service
-        run: |
-          cd services/location-service
-          docker build --platform linux/amd64 -t location-service .
-          docker tag location-service:latest $ECR_REGISTRY/location-service:latest
-          docker push $ECR_REGISTRY/location-service:latest
-      - name: Force ECS deployment - location-service
-        run: |
-          aws ecs update-service \
-            --cluster $ECS_CLUSTER \
-            --service location-service \
-            --force-new-deployment \
-            --region $AWS_REGION
+  deploy-api-gateway:
+    name: Deploy API Gateway
+    runs-on: ubunut-latest
+    needs: [deploy-services]
 
-  api-gateway:
-    name: API Gateway
-    runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
+      
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
-      - name: Build and push api-gateway
+      
+      - name: Build and push API Gateway
         run: |
           cd services/api-gateway
           docker build --platform linux/amd64 -t api-gateway .
           docker tag api-gateway:latest $ECR_REGISTRY/api-gateway:latest
           docker push $ECR_REGISTRY/api-gateway:latest
-      - name: Force ECS deployment - api-gateway
+      
+      - name: Force ECS deployment
         run: |
           aws ecs update-service \
             --cluster $ECS_CLUSTER \
