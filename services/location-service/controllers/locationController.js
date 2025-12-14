@@ -1,5 +1,8 @@
 const Location = require("../models/Location");
+const Room = require("../../room-service/models/Room");
 const mongoose = require("mongoose");
+const axios = require('axios')
+require("dotenv").config();
 
 exports.getAllLocations = async (req, res) => {
     try {
@@ -29,7 +32,6 @@ exports.getLocationById = async (req, res) => {
 exports.editLocationById = async (req, res) => {
     try {
         const id = new mongoose.Types.ObjectId(req.params.id);
-        console.log(req.body);
         const location = await Location.findOneAndUpdate(id, req.body, {new: true});
         if (location) {
             res.status(200).json({ message: "location updated", location: location });
@@ -50,5 +52,36 @@ exports.createNewLocation = async (req, res) => {
     } catch (err) {
         res.status(400).json({ error: err.message });
         console.error(`Couldn't create new location: ${err}`);
+    }
+}
+
+exports.getAllRoomsForLocation = async (req, res) => {
+    try {
+        const locationId = new mongoose.Types.ObjectId(req.params.id);
+        const url = `${process.env.ROOM_SERVICE_URL}?location=${locationId}`;
+        const rooms = await axios.get(url);
+        if (rooms.data.length == 0) {
+            res.status(404).json("Couldn't fetch rooms for location")
+        } else {
+            res.status(200).json(rooms.data);
+        }
+    } catch (err) {
+        res.status(400).json({ error: err.message });
+        console.error(`Couldn't fetch rooms for location: ${err}`);
+    }
+}
+
+exports.deleteLocation = async (req, res) => {
+    try {
+        const id = new mongoose.Types.ObjectId(req.params.id);
+        const location = await Location.findByIdAndDelete(id);
+        if (!location) {
+            res.status(404).json("Couldn't delete location")
+        } else {
+            res.status(200).json({message: `Location with id: ${id} delete`, location: location});
+        }
+    } catch (error) {
+        console.error(`Couldn't delete locations: ${error}`);
+        res.status(400).json({ error: error.message });
     }
 }

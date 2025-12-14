@@ -14,6 +14,12 @@ const roomSchema = new Schema({
     capacity: {
         type: Number,
         required: true
+    },
+    location: {
+        type: Schema.Types.ObjectId, 
+        ref: "Location",
+        required: true,
+        index: true,
     }
 }, { timestamps: true })
 

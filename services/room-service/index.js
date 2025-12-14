@@ -2,7 +2,7 @@ require('dotenv').config();
 require("./config/db")
 const express = require("express");
 const app = express();
-const PORT = process.env.port || 3003;
+const PORT = process.env.port || 8083;
 const roomRoutes = require("./routes/roomRoutes");
 
 app.use(express.json());
