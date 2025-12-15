@@ -12,6 +12,16 @@ const locationSchema = new Schema({
         type: String,
         required: true
     },
+    city: {
+        type: String,
+        required: true,
+    },
+    lat: {
+        type: Number,
+    },
+    lng: {
+        type: Number,
+    },
     country: {
         type: String,
         required: true

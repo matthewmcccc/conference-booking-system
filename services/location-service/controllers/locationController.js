@@ -47,8 +47,16 @@ exports.editLocationById = async (req, res) => {
 exports.createNewLocation = async (req, res) => {
     try {
         const params = req.body;
-        const newLocation = await Location.create(params)
-        res.status(201).json(newLocation);
+        const geocodeData = await axios.get(`${process.env.GEOCODING_URL}/search?name=${params.city}&count=10&language=en&format=json`)
+        let newLocation;
+        if (geocodeData.data.results.length > 0) {
+            const lat = geocodeData.data.results[0].latitude;
+            const lng = geocodeData.data.results[0].longitude;
+            newLocation = await Location.create({...params, lat, lng});
+        } else {
+            newLocation = await Location.create(params);
+        }
+        res.status(201).json({message: "New Location created", location: newLocation});
     } catch (err) {
         res.status(400).json({ error: err.message });
         console.error(`Couldn't create new location: ${err}`);
@@ -78,7 +86,7 @@ exports.deleteLocation = async (req, res) => {
         if (!location) {
             res.status(404).json("Couldn't delete location")
         } else {
-            res.status(200).json({message: `Location with id: ${id} delete`, location: location});
+            res.status(200).json({message: `Location with id: ${id} deleted`, location: location});
         }
     } catch (error) {
         console.error(`Couldn't delete locations: ${error}`);
