@@ -1,4 +1,5 @@
 const Booking = require("../models/Booking");
+const Location = require("../../location-service/models/Location");
 const axios = require("axios");
 const mongoose = require("mongoose");
 const calcPrice = require("../utils/calculateBookingPrice");
@@ -7,10 +8,9 @@ exports.getAllBookings = async (req, res) => {
     try {
         const bookings = await Booking.find();
         if (bookings.length == 0) {
-            res.status(404).json("Couldn't find any bookings");
-        } else {
-            res.status(200).json(bookings);
-        }
+            return res.status(404).json("Couldn't find any bookings");
+        } 
+        res.status(200).json(bookings);
     } catch (err) {
         console.error(`Couldn't get bookings: ${err}`);
         res.status(400).json({ message: err.message });
@@ -33,12 +33,17 @@ exports.createBooking = async (req, res) => {
         }
 
         const roomData = await axios.get(`${process.env.ROOM_SERVICE_URL}/${roomId}`);
-        const weatherData = await axios.get(`${process.env.WEATHER_SERVICE_URL}/forecast/5`)
+        const locationId = roomData.data.location;
+        const weatherData = await axios.get(`${process.env.WEATHER_SERVICE_URL}/forecast`, {
+            params: {
+                locationId: locationId,
+                date: date
+            }
+        })
 
         const basePrice = roomData.data.base_price;
         const temperature = weatherData.data.temperature
         const finalPrice = calcPrice(basePrice, temperature);
-        console.log(`temperature: ${temperature}`);
         const weatherAdjustment = finalPrice - basePrice;
 
         const booking = await Booking.create(
@@ -52,7 +57,7 @@ exports.createBooking = async (req, res) => {
             }
         );
         if (!booking) {
-            res.status(404).json("Couldn't create booking")
+            return res.status(404).json("Couldn't create booking")
         }
         res.status(200).json({ message: "Created booking successfully", booking: booking });
     } catch (err) {
@@ -66,7 +71,7 @@ exports.deleteBooking = async (req, res) => {
         const id = new mongoose.Types.ObjectId(req.params.id);
         const booking = await Booking.findByIdAndDelete(id);
         if (!booking) {
-            res.status(404).json({ message: "Couldn't find booking to delete "});
+            return res.status(404).json({ message: "Couldn't find booking to delete "});
         }
         res.status(200).json({message: "Booking successfully deleted", booking: booking});
     } catch (err) {

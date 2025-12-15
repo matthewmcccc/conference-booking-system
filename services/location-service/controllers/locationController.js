@@ -19,10 +19,9 @@ exports.getLocationById = async (req, res) => {
         const id = new mongoose.Types.ObjectId(req.params.id);
         const location = await Location.findById(id);
         if (location) {
-            res.status(200).json(location);
-        } else {
-            res.status(404).json({ message: "Location not found"});
-        }
+            return res.status(200).json(location);
+        } 
+        res.status(404).json({ message: "Location not found"});
     } catch (err) {
         res.status(400).json({ error: err.message });
         console.error(`Couldn't get location by id: ${err}`);
@@ -34,10 +33,9 @@ exports.editLocationById = async (req, res) => {
         const id = new mongoose.Types.ObjectId(req.params.id);
         const location = await Location.findOneAndUpdate(id, req.body, {new: true});
         if (location) {
-            res.status(200).json({ message: "location updated", location: location });
-        } else {
-            res.status(404).json({ message: "couldn't find location"})
-        }
+            return res.status(200).json({ message: "location updated", location: location });
+        } 
+        res.status(404).json({ message: "couldn't find location"})
     } catch (err) {
         console.error(`Couldn't update location: ${err}`);
         res.status(400).json({ err: err.message });
@@ -69,10 +67,9 @@ exports.getAllRoomsForLocation = async (req, res) => {
         const url = `${process.env.ROOM_SERVICE_URL}?location=${locationId}`;
         const rooms = await axios.get(url);
         if (rooms.data.length == 0) {
-            res.status(404).json("Couldn't fetch rooms for location")
-        } else {
-            res.status(200).json(rooms.data);
+            return res.status(404).json("Couldn't fetch rooms for location")
         }
+        res.status(200).json(rooms.data);
     } catch (err) {
         res.status(400).json({ error: err.message });
         console.error(`Couldn't fetch rooms for location: ${err}`);
@@ -84,10 +81,9 @@ exports.deleteLocation = async (req, res) => {
         const id = new mongoose.Types.ObjectId(req.params.id);
         const location = await Location.findByIdAndDelete(id);
         if (!location) {
-            res.status(404).json("Couldn't delete location")
-        } else {
-            res.status(200).json({message: `Location with id: ${id} deleted`, location: location});
-        }
+            return res.status(404).json("Couldn't delete location")
+        } 
+        res.status(200).json({message: `Location with id: ${id} deleted`, location: location});
     } catch (error) {
         console.error(`Couldn't delete locations: ${error}`);
         res.status(400).json({ error: error.message });
