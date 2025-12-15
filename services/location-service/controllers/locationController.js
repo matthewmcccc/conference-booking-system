@@ -47,7 +47,7 @@ exports.editLocationById = async (req, res) => {
 exports.createNewLocation = async (req, res) => {
     try {
         const params = req.body;
-        const geocodeData = await axios.get(`${process.env.GEOCODING_URL}/search?name=${params.city}&count=10&language=en&format=json`)
+        const geocodeData = await axios.get(`${process.env.GEOCODING_URL}/search?name=${params.city}&count=1&language=en&format=json`)
         let newLocation;
         if (geocodeData.data.results.length > 0) {
             const lat = geocodeData.data.results[0].latitude;
