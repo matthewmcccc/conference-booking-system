@@ -1,3 +1,4 @@
+require("./config/db");
 const express = require("express");
 const app = express();
 const bookingRoutes = require("./routes/bookingRoutes");

@@ -35,7 +35,7 @@ exports.createRoom = async (req, res) => {
 
 exports.getRoomById = async (req, res) => {
     try {
-        const id = mongoose.Types.ObjectId(req.params.id);
+        const id = new mongoose.Types.ObjectId(req.params.id);
         const room = await Room.findById(id)
         if (!room) {
             res.status(404).json("Couldn't find room by ID")
