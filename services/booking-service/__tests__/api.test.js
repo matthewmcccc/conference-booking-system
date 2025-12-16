@@ -10,27 +10,23 @@ beforeEach(() => {
     jest.clearAllMocks();
 });
 
-describe("GET /booking without auth", () => {
-    it("Should have status code 401", async () => {
+describe("Booking Services", () => {
+    it("Should return 401 when getting bookings without auth", async () => {
         const res = await request(app)
             .get("/api/bookings")
 
         expect(res.statusCode).toEqual(401);
     });
-})
 
-describe("GET /booking with auth", () => {
-    it("Should get booking with status code 200 and return all bookings", async () => {
+    it("Should return 200 when getting bookings with auth", async () => {
         const res = await request(app)
             .get("/api/bookings")
             .set("Authorization", `Bearer ${token}`);
 
         expect(res.statusCode).toEqual(200)
-    })
-})
+    });
 
-describe("POST /booking with auth", () => {
-    it("Should create booking and return status code 200", async () => {
+    it("Should create booking and return status code 200 with auth", async () => {
         const token = generateToken({ role: "admin" });
 
         setupBookingMocks();
@@ -48,10 +44,8 @@ describe("POST /booking with auth", () => {
         expect(res.statusCode).toEqual(200);
         expect(res.body.booking).toHaveProperty("total_price");
     });
-});
 
-describe("POST /booking without auth", () => {
-    it("Should not create booking and return status code 401", async () => {
+    it("Should return 401 when creating booking without auth", async () => {
         const bookingData = {
             room: "693ebb3b894bc4f1c01d48fd",
             date: new Date("2025-12-20")
@@ -62,5 +56,5 @@ describe("POST /booking without auth", () => {
             .send(bookingData);
 
         expect(res.statusCode).toEqual(401);
-    })
-})
+    });
+});
