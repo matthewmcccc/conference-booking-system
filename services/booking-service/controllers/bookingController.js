@@ -7,8 +7,8 @@ const calcPrice = require("../utils/calculateBookingPrice");
 exports.getAllBookings = async (req, res) => {
     try {
         const bookings = await Booking.find();
-        if (bookings.length == 0) {
-            return res.status(404).json("Couldn't find any bookings");
+        if (!bookings) {
+            return res.status(404).json("Couldn't get bookings");
         } 
         res.status(200).json(bookings);
     } catch (err) {
