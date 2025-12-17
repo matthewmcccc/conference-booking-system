@@ -13,15 +13,6 @@ describe("Room Service", () => {
     })
 
     it("Should get a specific room given a room ID", async () => {
-        // axios.get.mockResolvedValueOnce({
-        //     data: {
-        //         id: "6940460dae8e9d9e36e6a0ae",
-        //         latitude: 56.462,
-        //         longitude: -2.970,
-        //         name: "Dundee"
-        //     }
-        // });
-
         const room = await Room.create({
             base_price: 25,
             name: "Test Room",
