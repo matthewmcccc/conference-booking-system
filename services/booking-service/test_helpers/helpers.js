@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
+require("dotenv").config();
 
 const generateToken = (userData) => {
     return jwt.sign(
