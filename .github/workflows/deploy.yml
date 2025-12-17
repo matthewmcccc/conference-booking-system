@@ -35,13 +35,14 @@ jobs:
         run: |
             cd ./services/${{matrix.service}}
             npm install
-        env:
-          JWT_SECRET: ${{secrets.JWT_SECRET}}
+        
 
       - name: Run Jest tests
         run: |
             cd ./services/${{matrix.service}}
             npm test
+        env:
+          JWT_SECRET: ${{secrets.JWT_SECRET}}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
