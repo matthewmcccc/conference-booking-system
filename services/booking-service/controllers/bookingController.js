@@ -1,5 +1,4 @@
 const Booking = require("../models/Booking");
-const Location = require("../../location-service/models/Location");
 const axios = require("axios");
 const mongoose = require("mongoose");
 const calcPrice = require("../utils/calculateBookingPrice");
