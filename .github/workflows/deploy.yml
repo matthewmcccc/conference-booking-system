@@ -30,11 +30,11 @@ jobs:
             node-version: '20'
 
       - name: Install dependencies
-        run: cd/services/${{matrix.service}}
+        run: cd ./services/${{matrix.service}}
              npm install
 
       - name: Run Jest tests
-        run: cd/services/${{matrix.service}}
+        run: cd ./services/${{matrix.service}}
              npm test
 
       - name: Configure AWS credentials
