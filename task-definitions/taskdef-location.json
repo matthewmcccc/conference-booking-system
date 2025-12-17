@@ -7,7 +7,7 @@
       {"name": "GEOCODING_URL", "value": "https://geocoding-api.open-meteo.com/v1"},
       {"name": "PORT", "value": "8081"}
     ],
-    "portMappings": [{"containerPort": 8081, "protocol": "tcp"}],
+    "portMappings": [{"containerPort": 8081, "protocol": "tcp", "name": "location-service", "appProtocol": "http"}],
     "essential": true,
     "logConfiguration": {
       "logDriver": "awslogs",
@@ -23,6 +23,6 @@
   "cpu": "256",
   "memory": "512",
   "executionRoleArn": "arn:aws:iam::449591255785:role/ecsTaskExecutionRole",
-  "taskRoleArn": "arn:aws:iam::449591255785:role/aws-service-role/ecs.amazonaws.com/AWSServiceRoleForECS",
+  "taskRoleArn": "arn:aws:iam::449591255785:role/ecsTaskExecutionRole",
   "family": "location-service"
 }
