@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [weather-service, location-service, booking-service, room-service]
+        service: [weather-service, location-service, booking-service, room-service, auth-service]
 
     steps:
       - name: Checkout code
