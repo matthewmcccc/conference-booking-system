@@ -1,0 +1,30 @@
+{
+  "containerDefinitions": [{
+    "name": "booking-service",
+    "image": "449591255785.dkr.ecr.eu-west-1.amazonaws.com/booking-service",
+    "environment": [
+      {"name": "MONGODB_URL", "value": "mongodb+srv://matthewmcc:zVCpwp3W1mmEqNXc@cluster0.lcalcbp.mongodb.net/?appName=Cluster0"},
+      {"name": "JWT_SECRET", "value": "53ba9cfe3c9a1e7a84f8e6a4b9b863b4c1b8ac23f396cac66c1d02618ccb5e05e4b708ea27fc037474283ee1fcca2f5da2b284694351bf777d07268783da4b16"},
+      {"name": "ROOM_SERVICE_URL", "value": "http://room-service:8083/api/rooms"},
+      {"name": "WEATHER_SERVICE_URL", "value": "http://localhost:8080/api/weather"},
+      {"name": "PORT", "value": "8085"}
+    ],
+    "portMappings": [{"containerPort": 8085, "protocol": "tcp", "name": "booking-service", "appProtocol": "http"}],
+    "essential": true,
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/booking-service",
+        "awslogs-region": "eu-west-1",
+        "awslogs-stream-prefix": "ecs"
+      }
+    }
+  }],
+  "requiresCompatibilities": ["FARGATE"],
+  "networkMode": "awsvpc",
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::449591255785:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::449591255785:role/ecsTaskRole",
+  "family": "booking-service"
+}
