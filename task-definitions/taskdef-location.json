@@ -4,6 +4,7 @@
     "image": "449591255785.dkr.ecr.eu-west-1.amazonaws.com/location-service",
     "environment": [
       {"name": "MONGODB_URL", "value": "mongodb+srv://matthewmcc:zVCpwp3W1mmEqNXc@cluster0.lcalcbp.mongodb.net/?appName=Cluster0"},
+      {"name": "GEOCODING_URL", "value": "https://geocoding-api.open-meteo.com/v1"},
       {"name": "PORT", "value": "8081"}
     ],
     "portMappings": [{"containerPort": 8081, "protocol": "tcp"}],
