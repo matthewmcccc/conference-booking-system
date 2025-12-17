@@ -35,6 +35,8 @@ jobs:
         run: |
             cd ./services/${{matrix.service}}
             npm install
+        env:
+          JWT_SECRET: ${{secrets.JWT_SECRET}}
 
       - name: Run Jest tests
         run: |
