@@ -2,7 +2,9 @@ name: Deploy to ECS
 
 on:
   push:
-    branches: [main, dev]
+    branches: ['**']
+  pull_request:
+    branches: ['**']
 
 env:
   AWS_REGION: eu-west-1
@@ -18,12 +20,30 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [weather-service, location-service]
+        service: [weather-service, location-service, booking-service, room-service]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+            node-version: '20'
+
+      - name: Install dependencies
+        run: |
+            cd ./services/${{matrix.service}}
+            npm install
+        
+
+      - name: Run Jest tests
+        run: |
+            cd ./services/${{matrix.service}}
+            npm test
+        env:
+          JWT_SECRET: ${{secrets.JWT_SECRET}}
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:

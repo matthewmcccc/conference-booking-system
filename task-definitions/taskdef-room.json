@@ -1,19 +1,17 @@
 {
   "containerDefinitions": [{
-    "name": "location-service",
-    "image": "449591255785.dkr.ecr.eu-west-1.amazonaws.com/location-service",
+    "name": "room-service",
+    "image": "449591255785.dkr.ecr.eu-west-1.amazonaws.com/room-service",
     "environment": [
       {"name": "MONGODB_URL", "value": "mongodb+srv://matthewmcc:zVCpwp3W1mmEqNXc@cluster0.lcalcbp.mongodb.net/?appName=Cluster0"},
-      {"name": "GEOCODING_URL", "value": "https://geocoding-api.open-meteo.com/v1"},
-      {"name": "ROOM_SERVICE_URL", "value": "http://room-service:8083/api/rooms"},
-      {"name": "PORT", "value": "8081"}
+      {"name": "PORT", "value": "8083"}
     ],
-    "portMappings": [{"containerPort": 8081, "protocol": "tcp", "name": "location-service", "appProtocol": "http"}],
+    "portMappings": [{"containerPort": 8083, "protocol": "tcp", "name": "room-service", "appProtocol": "http"}],
     "essential": true,
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
-        "awslogs-group": "/ecs/location-service",
+        "awslogs-group": "/ecs/room-service",
         "awslogs-region": "eu-west-1",
         "awslogs-stream-prefix": "ecs"
       }
@@ -25,5 +23,5 @@
   "memory": "512",
   "executionRoleArn": "arn:aws:iam::449591255785:role/ecsTaskExecutionRole",
   "taskRoleArn": "arn:aws:iam::449591255785:role/ecsTaskRole",
-  "family": "location-service"
+  "family": "room-service"
 }

@@ -1,5 +1,4 @@
 const Location = require("../models/Location");
-const Room = require("../../room-service/models/Room");
 const mongoose = require("mongoose");
 const axios = require('axios')
 require("dotenv").config();
