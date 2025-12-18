@@ -2,7 +2,7 @@ const express = require("express");
 const axios = require("axios");
 const app = express();
 const { createProxyMiddleware } = require("http-proxy-middleware");
-const PORT = process.env.PORT || 8082;
+const PORT = process.env.PORT || 8086;
 
 const cors = require('cors');
 app.use(cors());
@@ -21,6 +21,24 @@ app.use('/api/weather', createProxyMiddleware({
     target: WEATHER_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: {'^/api/weather': ''}
+}))
+
+app.use('/api/auth', createProxyMiddleware({
+    target: AUTH_SERVICE_URL,
+    changeOrigin: true,
+    pathRewrite: {'^/api/auth': ''}
+}))
+
+app.use('/api/bookings', createProxyMiddleware({
+    target: BOOKING_SERVICE_URL,
+    changeOrigin: true,
+    pathRewrite: {'^/api/bookings': ''}
+}))
+
+app.use('/api/rooms', createProxyMiddleware({
+    target: ROOM_SERVICE_URL,
+    changeOrigin: true,
+    pathRewrite: {'^/api/room': ''}
 }))
 
 app.listen(PORT, () => {
