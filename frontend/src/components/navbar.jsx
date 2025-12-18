@@ -13,18 +13,20 @@ import { Button } from "./ui/button";
 
 const Navbar = () => {
     return (
-        <nav className="flex justify-between items-center m-6">
+        <nav className="flex m-6">
+            <div className="flex-1"></div> 
+            
             <NavigationMenu>
                 <NavigationMenuList>
                     <NavigationMenuItem>
-                        <NavigationMenuLink className="cursor-pointer">
+                        <NavigationMenuLink className="text-md cursor-pointer">
                             <Link to="/">
                                 Home    
                             </Link>
                         </NavigationMenuLink>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <NavigationMenuLink className="cursor-pointer">
+                        <NavigationMenuLink className="text-md cursor-pointer">
                             <Link to="/locations">
                                 Locations
                             </Link>
@@ -33,9 +35,13 @@ const Navbar = () => {
                 </NavigationMenuList>
             </NavigationMenu>
             
-            <Button variant="outline" className="cursor-pointer">
-                Log In
-            </Button>
+            <div className="flex-1 flex justify-end"> 
+                <Link to="/login">
+                    <Button variant="outline" className="cursor-pointer">
+                        Log In
+                    </Button>
+                </Link>
+            </div>
         </nav>
     )
 }

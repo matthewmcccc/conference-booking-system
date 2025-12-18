@@ -11,8 +11,13 @@ export default defineConfig({
     }
   },
   server: {
-    proxy: {
-      '/api': "http://localhost:8086"
-    }
+        proxy: {
+        '/api': {
+          target: 'http://localhost:8086',
+          changeOrigin: true,
+          secure: false,      
+          ws: true,
+        }
+      }
   }
 })

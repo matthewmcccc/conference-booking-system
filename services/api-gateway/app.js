@@ -14,34 +14,16 @@ const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || "http://auth-service:80
 const BOOKING_SERVICE_URL = process.env.BOOKING_SERVICE_URL || "http://booking-service:8085"
 const ROOM_SERVICE_URL = process.env.ROOM_SERVICE_URL || "http://room-service:8083"
 
-app.use('/api/locations', createProxyMiddleware({
-    target: LOCATION_SERVICE_URL,
+app.use('/api', createProxyMiddleware({
+    router: (req) => {
+        if (req.path.startsWith('/locations')) return LOCATION_SERVICE_URL;
+        if (req.path.startsWith('/weather')) return WEATHER_SERVICE_URL;
+        if (req.path.startsWith('/auth')) return AUTH_SERVICE_URL;
+        if (req.path.startsWith('/bookings')) return BOOKING_SERVICE_URL;
+        if (req.path.startsWith('/rooms')) return ROOM_SERVICE_URL;
+    },
     changeOrigin: true,
-    pathRewrite: {'^/api/locations': ''}
-}))
-
-app.use('/api/weather', createProxyMiddleware({
-    target: WEATHER_SERVICE_URL,
-    changeOrigin: true,
-    pathRewrite: {'^/api/weather': ''}
-}))
-
-app.use('/api/auth', createProxyMiddleware({
-    target: AUTH_SERVICE_URL,
-    changeOrigin: true,
-    pathRewrite: {'^/api/auth': ''}
-}))
-
-app.use('/api/bookings', createProxyMiddleware({
-    target: BOOKING_SERVICE_URL,
-    changeOrigin: true,
-    pathRewrite: {'^/api/bookings': ''}
-}))
-
-app.use('/api/rooms', createProxyMiddleware({
-    target: ROOM_SERVICE_URL,
-    changeOrigin: true,
-    pathRewrite: {'^/api/room': ''}
+    pathRewrite: (path) => '/api' + path
 }))
 
 app.listen(PORT, () => {
