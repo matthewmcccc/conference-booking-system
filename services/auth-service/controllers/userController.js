@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const encryptPassword = require("../utils/crypto");
+const authenticateToken = require("../utils/authenticateToken");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
@@ -95,5 +96,19 @@ exports.loginUser = async (req, res) => {
     } catch (error) {
         res.status(400).json(`Couldn't log in user: ${error}`);
         console.error(`Couldn't log in user: ${error}`);
+    }
+}
+
+exports.getUserData = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId).select("-password");
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found"});
+        }
+
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: "Server error"});
     }
 }
