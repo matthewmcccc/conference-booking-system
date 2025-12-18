@@ -10,6 +10,9 @@ app.use(express.json());
 
 const WEATHER_SERVICE_URL = process.env.WEATHER_SERVICE_URL || 'http://weather-service:8080'
 const LOCATION_SERVICE_URL = process.env.LOCATION_SERVICE_URL ||  'http://location-service:8081'
+const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || "http://auth-service:8084"
+const BOOKING_SERVICE_URL = process.env.BOOKING_SERVICE_URL || "http://booking-service:8085"
+const ROOM_SERVICE_URL = process.env.ROOM_SERVICE_URL || "http://room-service:8083"
 
 app.use('/api/locations', createProxyMiddleware({
     target: LOCATION_SERVICE_URL,
