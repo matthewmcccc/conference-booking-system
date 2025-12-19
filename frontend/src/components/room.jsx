@@ -1,8 +1,20 @@
 import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import DatePicker from "./datePicker";
 import { Button } from "./ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Room({ room }) {
+    const { user } = useAuth();
+    const [selectedDate, setSelectedDate] = useState(null);
+    const navigate = useNavigate();
+
+    const handleBookNow = () => {
+        if (selectedDate) {
+            navigate(`/book/${room._id}`, { state: { date: selectedDate } });
+        }
+    };
+
     return (
         <div className="grid grid-cols-3 my-12">
             <div className="col-span-1">
@@ -26,10 +38,20 @@ export default function Room({ room }) {
                     </div>
                 </div>
                 <div className="flex gap-2 items-center">
-                    <DatePicker className=""/>
-                    <Button className="self-start">
-                        Book Now
-                    </Button>
+                    <DatePicker date={selectedDate} setDate={setSelectedDate} />
+                    {user ? (
+                        <Button 
+                            className="cursor-pointer self-start"
+                            onClick={handleBookNow}
+                            disabled={!selectedDate}
+                        >
+                            Book Now
+                        </Button>
+                    ) : (
+                        <Button className="self-start cursor-not-allowed" disabled>
+                            Book Now
+                        </Button>
+                    )}
                 </div>
             </div>
         </div>

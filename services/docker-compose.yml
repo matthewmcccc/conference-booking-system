@@ -6,6 +6,7 @@ services:
       - "8080:8080"
     environment:
       - NODE_ENV=development
+      - LOCATION_SERVICE_URL=http://location-service:8081/api/locations
 
   location-service:
     build: ./location-service

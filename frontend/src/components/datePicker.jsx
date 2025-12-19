@@ -1,7 +1,6 @@
 import { ChevronDownIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
-import { Label } from "@/components/ui/label"
 import {
   Popover,
   PopoverContent,
@@ -9,9 +8,8 @@ import {
 } from "@/components/ui/popover"
 import { useState } from "react";
 
-export default function DatePicker () {
+export default function DatePicker ({ date, setDate }) {
     const [open, setOpen] = useState(false);
-    const [date, setDate] = useState(undefined);
 
     return (
       <Popover open={open} onOpenChange={setOpen}>
@@ -30,10 +28,12 @@ export default function DatePicker () {
             mode="single"
             selected={date}
             captionLayout="dropdown"
+            disabled={date => date < new Date()}
             onSelect={(date) => {
               setDate(date)
               setOpen(false)
             }}
+            className="[&_.rdp-day_today]:bg-transparent [&_.rdp-day_today]:font-normal"
           />
         </PopoverContent>
       </Popover>

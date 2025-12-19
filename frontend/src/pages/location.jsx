@@ -23,7 +23,6 @@ export default function Location() {
 
     return (
         <main className="m-6 w-full">
-            {console.log(rooms)}
             <h1>{location.city} Conference Rooms</h1>
             <div className="">
                 {

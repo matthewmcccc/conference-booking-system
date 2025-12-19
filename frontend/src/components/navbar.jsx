@@ -10,12 +10,14 @@ import {
 } from "@/components/ui/navigation-menu"
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
+    const { user, loading, logout } = useAuth();
+
     return (
         <nav className="flex m-6">
             <div className="flex-1"></div> 
-            
             <NavigationMenu>
                 <NavigationMenuList>
                     <NavigationMenuItem>
@@ -36,11 +38,19 @@ const Navbar = () => {
             </NavigationMenu>
             
             <div className="flex-1 flex justify-end"> 
-                <Link to="/login">
-                    <Button variant="outline" className="cursor-pointer">
-                        Log In
-                    </Button>
-                </Link>
+                    {user ? 
+                        <Link onClick={logout}>
+                            <Button variant="outline" className="cursor-pointer">
+                                Sign Out
+                            </Button>
+                        </Link>
+                        :
+                        <Link to="/login">
+                            <Button variant="outline" className="cursor-pointer">
+                                Sign In
+                            </Button>
+                         </Link>
+                    }
             </div>
         </nav>
     )
