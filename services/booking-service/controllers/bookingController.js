@@ -117,3 +117,11 @@ exports.getBookingsForUser = async (req, res) => {
         return res.status(400).json({ message: error.message });
     }
 }
+
+exports.health = async (req, res) => {
+    try {
+        return res.status(200).json({ message: "Booking service is healthy"})
+    } catch (error) {
+        return res.status(404).json({ message: ` Booking service isn't healthy: ${error}` })
+    }
+}
