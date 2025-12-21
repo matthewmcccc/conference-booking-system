@@ -5,8 +5,24 @@ const app = express();
 const PORT = process.env.PORT || 8086;
 const cors = require('cors');
 
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+    origin: [
+        'http://52.17.242.229',
+        'http://conference-room-loadbalancer-1421121313.eu-west-1.elb.amazonaws.com'
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}))cors());
+app.use(cors({
+    origin: [
+        'http://52.17.242.229',
+        'http://conference-room-loadbalancer-1421121313.eu-west-1.elb.amazonaws.com'
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}))express.json());
 
 const WEATHER_SERVICE_URL = process.env.WEATHER_SERVICE_URL || 'http://weather-service:8080'
 const LOCATION_SERVICE_URL = process.env.LOCATION_SERVICE_URL ||  'http://location-service:8081'
@@ -14,7 +30,15 @@ const AUTH_SERVICE_URL = process.env.AUTH_SERVICE_URL || "http://auth-service:80
 const BOOKING_SERVICE_URL = process.env.BOOKING_SERVICE_URL || "http://booking-service:8085"
 const ROOM_SERVICE_URL = process.env.ROOM_SERVICE_URL || "http://room-service:8083"
 
-app.use('/api', async (req, res) => {
+app.use(cors({
+    origin: [
+        'http://52.17.242.229',
+        'http://conference-room-loadbalancer-1421121313.eu-west-1.elb.amazonaws.com'
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}))'/api', async (req, res) => {
     try {
         const path = req.path;
         
