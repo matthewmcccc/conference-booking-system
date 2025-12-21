@@ -8,5 +8,6 @@ router.put("/:id", roomController.editRoomById);
 router.post("/", roomController.createRoom);
 router.delete("/:id", roomController.deleteRoom)
 router.delete("/location/:locationId", roomController.deleteRoomByLocationId);
+router.get("/health", roomController.health);
 
 module.exports = router;
