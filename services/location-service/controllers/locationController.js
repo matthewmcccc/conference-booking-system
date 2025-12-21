@@ -91,3 +91,11 @@ exports.deleteLocation = async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 }
+
+exports.health = async (req, res) => {
+    try {
+        return res.status(200).json({ message: "Location service is healthy"})
+    } catch {
+        return res.status(404).json({ message: "Uh-oh! Location controller is dead."})
+    };
+}
