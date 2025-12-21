@@ -11,6 +11,7 @@ app.use(cors({
     'http://localhost',
     'http://localhost:80', 
     'http://localhost:8080',
+    'http://conference-room-loadbalancer-1421121313.eu-west-1.elb.amazonaws.com'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

@@ -64,6 +64,9 @@ exports.getAllRoomsForLocation = async (req, res) => {
     try {
         const locationId = new mongoose.Types.ObjectId(req.params.id);
         const url = `${process.env.ROOM_SERVICE_URL}?location=${locationId}`;
+        console.log('Calling room service at:', url); // ADD THIS
+        console.log('ROOM_SERVICE_URL env var:', process.env.ROOM_SERVICE_URL); // AND THIS
+        
         const rooms = await axios.get(url);
         if (rooms.data.length == 0) {
             return res.status(404).json("Couldn't fetch rooms for location")
@@ -87,4 +90,12 @@ exports.deleteLocation = async (req, res) => {
         console.error(`Couldn't delete locations: ${error}`);
         res.status(400).json({ error: error.message });
     }
+}
+
+exports.health = async (req, res) => {
+    try {
+        return res.status(200).json({ message: "Location service is healthy"})
+    } catch {
+        return res.status(404).json({ message: "Uh-oh! Location controller is dead."})
+    };
 }

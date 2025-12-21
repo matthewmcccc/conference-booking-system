@@ -88,3 +88,11 @@ exports.deleteRoomByLocationId = async (req, res) => {
         res.status(500).json({ error: error.message })
     }
 }
+
+exports.health = async (req, res) => {
+    try {
+        return res.status(200).json({ message: "Room service is healthy"})
+    } catch (error) {
+        return res.status(404).json({ message: `Room service is down: ${error.message}` })
+    }
+}

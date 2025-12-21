@@ -3,6 +3,7 @@ const router = express.Router();
 const userController = require("../controllers/userController");
 const authenticateToken = require("../utils/authenticateToken")
 
+router.get("/health", userController.health);
 router.get("/", userController.getAllUsers);
 router.post("/", userController.createUser);
 router.delete("/:id", userController.deleteUser);

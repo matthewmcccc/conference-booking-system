@@ -4,6 +4,9 @@ const axios = require("axios");
 
 exports.getWeatherData = async (req, res) => {
     try {
+        console.log('FORECAST_API:', process.env.FORECAST_API); // ADD THIS
+        console.log('LOCATION_SERVICE_URL:', process.env.LOCATION_SERVICE_URL); // ADD THIS
+
         const { locationId, date } = req.query;
         console.log("Request received at weather API");
         console.log(req.query);
@@ -58,4 +61,12 @@ exports.getWeatherData = async (req, res) => {
         console.error(`Couldn't get weather data: ${err}`);
         res.status(400).json({ error: err.message });
     }
+}
+
+exports.health = async (req, res) => {
+    try {
+        return res.status(200).json({ message: "Weather service is healthy"})
+    } catch (error) {
+        return res.status(404).json({ message: "Weather service is down"})
+    };
 }

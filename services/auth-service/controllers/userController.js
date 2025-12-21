@@ -116,3 +116,11 @@ exports.getUserData = async (req, res) => {
         res.status(500).json({ message: "Server error"});
     }
 }
+
+exports.health = async (req, res) => {
+    try {
+        return res.status(200).json({ message: "Auth service is nice and healthy." })
+    } catch {
+        return res.status(404).json({ message: "You probably won't ever see this if the auath service is truly cooked." })
+    }
+}

@@ -4,6 +4,7 @@ import { toast } from "sonner"
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import axios from "axios";
+import api from "@/lib/axios"
 
 const RoomCard = (props) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +21,7 @@ const RoomCard = (props) => {
         setIsLoading(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await axios.post('/api/bookings', {
+            const res = await api.post('/api/bookings/', {
                 room: props.room_id,
                 date: props.booking_date
             }, {
