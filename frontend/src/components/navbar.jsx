@@ -11,6 +11,7 @@ import {
 import { Link } from "react-router-dom";
 import { Button } from "./ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { CircleUserRound } from "lucide-react";
 
 const Navbar = () => {
     const { user, loading, logout } = useAuth();
@@ -39,11 +40,17 @@ const Navbar = () => {
             
             <div className="flex-1 flex justify-end"> 
                     {user ? 
-                        <Link onClick={logout}>
-                            <Button variant="outline" className="cursor-pointer">
-                                Sign Out
-                            </Button>
-                        </Link>
+                        <div className="flex flex-row items-center gap-8">
+                            <Link to="/me">
+                                <CircleUserRound/>
+                            </Link>
+                            <Link onClick={logout}>
+                                <Button variant="outline" className="cursor-pointer">
+                                    Sign Out
+                                </Button>
+                            </Link>
+                        </div>
+                        
                         :
                         <Link to="/login">
                             <Button variant="outline" className="cursor-pointer">

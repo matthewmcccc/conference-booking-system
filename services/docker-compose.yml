@@ -25,6 +25,8 @@ services:
       - "8085:8085"
     environment:
      - NODE_ENV=development
+     - ROOM_SERVICE_URL=http://room-service:8083/api/rooms
+     - WEATHER_SERVICE_URL=http://weather-service:8080/api/weather
 
   room-service:
     build: ./room-service

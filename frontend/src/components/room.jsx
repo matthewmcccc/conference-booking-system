@@ -9,9 +9,13 @@ export default function Room({ room }) {
     const [selectedDate, setSelectedDate] = useState(null);
     const navigate = useNavigate();
 
-    const handleBookNow = () => {
+   const handleBookNow = () => {
         if (selectedDate) {
-            navigate(`/book/${room._id}`, { state: { date: selectedDate } });
+            const formattedDate = selectedDate instanceof Date 
+                ? selectedDate.toISOString().split('T')[0]
+                : selectedDate;
+            
+            navigate(`/book/${room._id}`, { state: { date: formattedDate } });
         }
     };
 

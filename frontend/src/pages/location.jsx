@@ -27,6 +27,7 @@ export default function Location() {
             <div className="">
                 {
                     rooms.map((room) => {
+                        console.log(room);
                         return (
                             <Room key={room._id} room={room} />
                         )

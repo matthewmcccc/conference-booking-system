@@ -16,6 +16,31 @@ exports.getAllBookings = async (req, res) => {
     }
 }
 
+exports.calculatePrice = async (req, res) => {
+    try {
+        const { roomId, date } = req.query;
+
+        const roomData = await axios.get(`${process.env.ROOM_SERVICE_URL}/${roomId}`);
+        const room = roomData.data;
+
+        const url = `${process.env.WEATHER_SERVICE_URL}/forecast?locationId=${room.location}&date=${date}`
+
+        const weatherData = await axios.get(url);
+        const weather = weatherData.data;
+
+        const finalPrice = calcPrice(room.base_price, weather.temperature);
+
+        if (finalPrice) {
+            return res.status(200).json({
+                final_price: finalPrice,
+            })    
+        }
+    } catch (err) {
+        console.error(`Couldn't calculate booking price: ${err}`);
+        return res.status(400).json({ message: `Couldn't calculate booking price: ${err}`});
+    }
+}
+
 exports.createBooking = async (req, res) => {
     try {
         const { room: roomId, date } = req.body;

@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./components/theme-provider";
+import { Toaster } from "sonner";
 import Locations from "./pages/locations";
 import Location from "./pages/location";
 import Home from "./pages/Home";
@@ -21,6 +22,7 @@ const App = () => {
             <Route path="/login" element={<Login />} />
             <Route path="/book/:roomid" element={<Book />} /> 
           </Routes>
+          <Toaster />
         </AuthProvider>
       </Router>
     </ ThemeProvider>
