@@ -3,7 +3,9 @@
     "name": "weather-service",
     "image": "449591255785.dkr.ecr.eu-west-1.amazonaws.com/weather-service",
     "environment": [
-      {"name": "PORT", "value": "8080"}
+      {"name": "PORT", "value": "8080"},
+      {"name": "FORECAST_API", "value": "https://api.open-meteo.com/v1/forecast"},
+      {"name": "LOCATION_SERVICE_URL", "value": "http://location-service:8081/api/location"}
     ],
     "portMappings": [{"containerPort": 8080, "protocol": "tcp", "name": "weather-service", "appProtocol": "http"}],
     "essential": true,
