@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react"
 import axios from "axios";
 import LocationCard from "@/components/locationCard";
+import api from "@/lib/axios";
 
 export default function Locations() {
     const [locations, setLocations] = useState([]);
 
     useEffect(() => {
         const getLocations = async () => {
-            const res = await axios.get("/api/locations");
+            const res = await api.get("/api/locations");
             const locationData = res.data;
             setLocations(locationData);
         }

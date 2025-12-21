@@ -3,15 +3,20 @@ import { Link, useNavigate } from "react-router-dom";
 import DatePicker from "./datePicker";
 import { Button } from "./ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export default function Room({ room }) {
     const { user } = useAuth();
     const [selectedDate, setSelectedDate] = useState(null);
     const navigate = useNavigate();
 
-    const handleBookNow = () => {
+   const handleBookNow = () => {
         if (selectedDate) {
-            navigate(`/book/${room._id}`, { state: { date: selectedDate } });
+            const formattedDate = selectedDate instanceof Date 
+                ? selectedDate.toISOString().split('T')[0]
+                : selectedDate;
+            
+            navigate(`/book/${room._id}`, { state: { date: formattedDate } });
         }
     };
 
@@ -48,7 +53,9 @@ export default function Room({ room }) {
                             Book Now
                         </Button>
                     ) : (
-                        <Button className="self-start cursor-not-allowed" disabled>
+                        <Button className="self-start cursor-pointer" onClick={() => {
+                            toast.error("You must be a user to make a booking")
+                        }}>
                             Book Now
                         </Button>
                     )}
