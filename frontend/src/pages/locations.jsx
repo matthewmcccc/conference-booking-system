@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react"
-import axios from "axios";
 import LocationCard from "@/components/locationCard";
 import api from "@/lib/axios";
 
