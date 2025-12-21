@@ -103,3 +103,17 @@ exports.deleteBooking = async (req, res) => {
         res.status(400).json({ error: err.message });
     }
 }
+
+exports.getBookingsForUser = async (req, res) => {
+    try {
+        const userId = req.params.userid;
+        const bookings = await Booking.find({ user: userId });
+        if (bookings) {
+            return res.status(200).json({ message: "Retrieved bookings for user", bookings: bookings })
+        };
+        return res.status(404).json({ message: "Couldn't retrieve bookings for user "})
+    } catch (error) {
+        console.error(`Couldn't fetch bookings for user: ${error}`);
+        return res.status(400).json({ message: error.message });
+    }
+}
