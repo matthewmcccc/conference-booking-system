@@ -21,7 +21,7 @@ const RoomCard = (props) => {
         setIsLoading(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await api.post('/api/bookings', {
+            const res = await api.post('/api/bookings/', {
                 room: props.room_id,
                 date: props.booking_date
             }, {
