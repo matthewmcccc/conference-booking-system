@@ -5,7 +5,7 @@
     "environment": [
       {"name": "PORT", "value": "8080"},
       {"name": "FORECAST_API", "value": "https://api.open-meteo.com/v1/forecast"},
-      {"name": "LOCATION_SERVICE_URL", "value": "http://location-service:8081/api/location"}
+      {"name": "LOCATION_SERVICE_URL", "value": "http://location-service:8081/api/locations"}
     ],
     "portMappings": [{"containerPort": 8080, "protocol": "tcp", "name": "weather-service", "appProtocol": "http"}],
     "essential": true,
