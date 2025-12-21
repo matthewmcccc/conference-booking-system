@@ -59,3 +59,11 @@ exports.getWeatherData = async (req, res) => {
         res.status(400).json({ error: err.message });
     }
 }
+
+exports.health = async (req, res) => {
+    try {
+        return res.status(200).json({ message: "Weather service is healthy"})
+    } catch (error) {
+        return res.status(404).json({ message: "Weather service is down"})
+    };
+}
