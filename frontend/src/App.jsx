@@ -7,6 +7,7 @@ import Home from "./pages/Home";
 import Navbar from "./components/navbar";
 import Login from "./pages/login";
 import Book from "./pages/book";
+import UserHomepage from "./pages/userHomepage";
 import { AuthProvider } from "./contexts/AuthContext";
 
 const App = () => {
@@ -21,6 +22,7 @@ const App = () => {
             <Route path="/locations/:id" element={<Location />} />
             <Route path="/login" element={<Login />} />
             <Route path="/book/:roomid" element={<Book />} /> 
+            <Route path="/me" element={<UserHomepage />} />
           </Routes>
           <Toaster />
         </AuthProvider>

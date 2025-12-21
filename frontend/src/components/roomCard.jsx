@@ -1,12 +1,13 @@
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardDescription, CardTitle, CardFooter } from '@/components/ui/card'
 import { toast } from "sonner"
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import axios from "axios";
 
 const RoomCard = (props) => {
     const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
 
     const handleBooking = async () => {
         if (!props.booking_date) {
@@ -28,6 +29,7 @@ const RoomCard = (props) => {
                 }
             });
 
+            navigate("/me")
             toast.success("Success!", {
                 description: "Booking created successfully."
             })
