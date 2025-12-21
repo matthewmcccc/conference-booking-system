@@ -3,7 +3,7 @@ import { ThemeProvider } from "./components/theme-provider";
 import { Toaster } from "sonner";
 import Locations from "./pages/locations";
 import Location from "./pages/location";
-import Home from "./pages/Home";
+import Home from "./pages/home";
 import Navbar from "./components/navbar";
 import Login from "./pages/login";
 import Book from "./pages/book";
