@@ -1,9 +1,10 @@
+require("dotenv").config();
 const express = require("express");
 const axios = require("axios");
 const app = express();
 const PORT = process.env.PORT || 8086;
-
 const cors = require('cors');
+
 app.use(cors());
 app.use(express.json());
 
@@ -16,7 +17,6 @@ const ROOM_SERVICE_URL = process.env.ROOM_SERVICE_URL || "http://room-service:80
 app.use('/api', async (req, res) => {
     try {
         const path = req.path;
-        console.log(`[Gateway] ${req.method} /api${path}`);
         
         let targetUrl;
         
@@ -34,9 +34,6 @@ app.use('/api', async (req, res) => {
             return res.status(404).json({ error: 'Route not found' });
         }
 
-        console.log(`[Gateway] Forwarding to: ${targetUrl}`);
-        console.log(`[Gateway] Body:`, req.body);
-        
         const response = await axios({
             method: req.method,
             url: targetUrl,
@@ -49,11 +46,9 @@ app.use('/api', async (req, res) => {
             timeout: 10000
         });
         
-        console.log(`[Gateway] Response status: ${response.status}`);
         res.status(response.status).json(response.data);
         
     } catch (error) {
-        console.error('[Gateway] Error:', error.message);
         if (error.response) {
             res.status(error.response.status).json(error.response.data);
         } else {
