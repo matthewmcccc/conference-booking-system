@@ -3,6 +3,7 @@ import { useLocation, useParams } from "react-router-dom";
 import axios from "axios";
 import RoomCard from "@/components/roomCard";
 import { useAuth } from "@/contexts/AuthContext";
+import api from "@/lib/axios";
 
 export default function Booking() {
     const { user } = useAuth();
@@ -18,7 +19,7 @@ export default function Booking() {
         const getRoomData = async () => {
             try {
                 setLoading(true);
-                const roomData = await axios.get(`/api/rooms/${roomid}`);
+                const roomData = await api.get(`/api/rooms/${roomid}`);
                 setRoom(roomData.data);
             } catch (err) {
                 console.error("Failed to fetch room:", err);
@@ -37,7 +38,7 @@ export default function Booking() {
             try {
                 const token = localStorage.getItem("token")
                 setLoading(true)
-                const costData = await axios.get(`/api/bookings/calculate-price?roomId=${roomid}&date=${selectedDate}`, {
+                const costData = await api.get(`/api/bookings/calculate-price?roomId=${roomid}&date=${selectedDate}`, {
                     headers: {
                         "Authorization": `Bearer ${token}`
                     }

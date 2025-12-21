@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import api from "@/lib/axios"
 
 export default function UserHomepage() {
     const [loading, setLoading] = useState(true);
@@ -21,7 +22,7 @@ export default function UserHomepage() {
                 const userId = user._id;
                 const token = localStorage.getItem("token");
                 
-                const res = await axios.get(`/api/bookings/${userId}`, {
+                const res = await api.get(`/api/bookings/${userId}`, {
                    headers: {
                     "Authorization": `Bearer ${token}`
                    }

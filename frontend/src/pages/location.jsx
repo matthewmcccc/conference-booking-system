@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import axios from "axios"
 import Room from "@/components/room";
+import api from "@/lib/axios";
 
 export default function Location() {
     const { id } = useParams();
@@ -11,8 +12,8 @@ export default function Location() {
     useEffect(() => {
         const fetchData = async () => {
             const [locationRes, roomRes] = await Promise.all([
-                axios.get(`/api/locations/${id}`),
-                axios.get(`/api/locations/${id}/rooms`)
+                api.get(`/api/locations/${id}`),
+                api.get(`/api/locations/${id}/rooms`)
             ])
             setRooms(roomRes.data);
             setLocation(locationRes.data);
