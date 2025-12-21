@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import DatePicker from "./datePicker";
 import { Button } from "./ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export default function Room({ room }) {
     const { user } = useAuth();
@@ -52,7 +53,9 @@ export default function Room({ room }) {
                             Book Now
                         </Button>
                     ) : (
-                        <Button className="self-start cursor-not-allowed" disabled>
+                        <Button className="self-start cursor-pointer" onClick={() => {
+                            toast.error("You must be a user to make a booking")
+                        }}>
                             Book Now
                         </Button>
                     )}
