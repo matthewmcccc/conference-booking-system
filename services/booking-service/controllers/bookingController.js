@@ -25,6 +25,11 @@ exports.calculatePrice = async (req, res) => {
 
         const url = `${process.env.WEATHER_SERVICE_URL}/forecast?locationId=${room.location}&date=${date}`
 
+        console.log('Weather service URL:', url); // ADD THIS
+        console.log('Room location:', room.location); // ADD THIS
+        console.log('Date:', date); // ADD THIS
+
+
         const weatherData = await axios.get(url);
         const weather = weatherData.data;
 
