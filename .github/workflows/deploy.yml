@@ -70,13 +70,13 @@ jobs:
             --force-new-deployment \
             --region $AWS_REGION
   
-  deploy-api-gateway:
-    name: Deploy API Gateway
+  deploy-frontend:
+    name: Deploy Frontend
     runs-on: ubuntu-latest
     needs: [deploy-services]
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
       
       - name: Configure AWS credentials
@@ -85,22 +85,36 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-      
+
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
-      
-      - name: Build and push API Gateway
+        
+      - name: Build and push frontend
         run: |
-          cd services/api-gateway
-          docker build --platform linux/amd64 -t api-gateway .
-          docker tag api-gateway:latest $ECR_REGISTRY/api-gateway:latest
-          docker push $ECR_REGISTRY/api-gateway:latest
-      
-      - name: Force ECS deployment
-        run: |
-          aws ecs update-service \
-            --cluster $ECS_CLUSTER \
-            --service api-gateway \
-            --force-new-deployment \
-            --region $AWS_REGION
+          cd frontend
+          docker build --platform linux/amd64 -t frontend .
+          docker tag frontend:latest $ECR_REGISTRY/frontend:latest
+          docker push $ECR_REGISTRY/frontend:latest
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+            host: ${{ secrets.EC2_HOST }}
+            username: ${{ secrets.EC2_USERNAME }}
+            key: ${{ secrets.EC2_SSH_KEY }}
+            script: |
+              aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 449591255785.dkr.ecr.eu-west-1.amazonaws.com
+
+              docker pull 449591255785.dkr.ecr.eu-west-1.amazonaws.com/frontend:latest
+
+              docker stop frontend || true
+              docker rm frontend || true
+
+              docker run -d \
+                --name frontend \
+                -p 80:80 \
+                --restart unless-stopped \
+                449591255785.dkr.ecr.eu-west-1.amazonaws.com/frontend:latest
+
+              docker image prune -af
