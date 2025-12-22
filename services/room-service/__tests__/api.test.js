@@ -3,6 +3,9 @@ const app = require("../app");
 const axios = require("axios");
 const Room = require("../models/Room");
 jest.mock("axios");
+const { generateToken } = require("../test_helpers/helpers");
+
+const token = generateToken({ role: "admin" })
 
 describe("Room Service", () => {
     it("Should get all rooms", async () => {
@@ -40,6 +43,7 @@ describe("Room Service", () => {
             .send({
                 name: "Updated Test Room"
             })
+            .set("Authorization", `Bearer ${token}`)
         
         expect(res.statusCode).toEqual(200);
         expect(res.body.name).toEqual("Updated Test Room");
@@ -56,6 +60,7 @@ describe("Room Service", () => {
         const res = await request(app)
             .post("/api/rooms")
             .send(roomData)
+            .set("Authorization", `Bearer ${token}`)
 
         expect(res.statusCode).toEqual(201);
         expect(res.body).toBeDefined();
@@ -72,7 +77,40 @@ describe("Room Service", () => {
 
         const res = await request(app)
             .delete(`/api/rooms/${room._id}`)
+            .set("Authorization", `Bearer ${token}`)
         
         expect(res.statusCode).toEqual(200);
+    })
+})
+
+describe("DELETE /api/rooms/:locationid", () => {
+    it("Should delete all rooms for a given location ID", async () => {
+        const locationId = "6940460dae8e9d9e36e6a0ae";
+
+        const res = await request(app)
+            .delete(`/api/rooms/location/${locationId}`)
+            .set("Authorization", `Bearer ${token}`)
+        
+        expect(res.statusCode).toEqual(200);
+    })
+
+    it("Should return 500 when there is an error deleting rooms by location ID", async () => {
+        const locationId = "randomlocationid"
+
+        const res = await request(app)
+            .delete(`/api/rooms/location/${locationId}`)
+            .set("Authorization", `Bearer ${token}`)
+        
+        expect(res.statusCode).toEqual(500);
+    })
+})
+
+describe("GET /health", () => {
+    it("Should return a healthy status", async () => {
+        const res = await request(app)
+            .get("/api/rooms/health")
+
+        expect(res.statusCode).toEqual(200);
+        expect(res.body.message).toEqual("Room service is healthy");
     })
 })

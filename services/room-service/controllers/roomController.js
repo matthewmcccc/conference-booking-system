@@ -49,6 +49,12 @@ exports.getRoomById = async (req, res) => {
 
 exports.editRoomById = async (req, res) => {
     try {
+        const { role } = req.user;
+
+        if (role != "admin") {
+            return res.status(403).json({ error: "Forbidden: Admins only" });
+        };
+
         const id = new mongoose.Types.ObjectId(req.params.id);
         const body = req.body;
         const room = await Room.findOneAndUpdate(id, body, {new: true});
@@ -64,6 +70,12 @@ exports.editRoomById = async (req, res) => {
 
 exports.deleteRoom = async (req, res) => {
     try {
+        const { role } = req.user;
+
+        if (role != "admin") {
+            return res.status(403).json({ error: "Forbidden: Admins only" });
+        };
+
         const id = new mongoose.Types.ObjectId(req.params.id);
         const room = await Room.findByIdAndDelete(id);
         if (!room){
@@ -78,6 +90,12 @@ exports.deleteRoom = async (req, res) => {
 
 exports.deleteRoomByLocationId = async (req, res) => {
     try {
+        const { role } = req.user;
+
+        if (role != "admin") {
+            return res.status(403).json({ error: "Forbidden: Admins only" });
+        };
+
         const locationId = new mongoose.Types.ObjectId(req.params.locationId);
         const result = await Room.deleteMany({ location: locationId });
         res.status(200).json({
