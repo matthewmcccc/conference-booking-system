@@ -29,6 +29,12 @@ exports.getLocationById = async (req, res) => {
 
 exports.editLocationById = async (req, res) => {
     try {
+        const { role } = req.user;
+
+        if (role !== "admin") {
+            return res.status(403).json({ message: "Forbidden: Insufficient permissions" });
+        }
+
         const id = new mongoose.Types.ObjectId(req.params.id);
         const location = await Location.findOneAndUpdate(id, req.body, {new: true});
         if (location) {
@@ -43,6 +49,12 @@ exports.editLocationById = async (req, res) => {
 
 exports.createNewLocation = async (req, res) => {
     try {
+        const { role } = req.user;
+
+        if (role !== "admin") {
+            return res.status(403).json({ message: "Forbidden: Insufficient permissions" });
+        }
+
         const params = req.body;
         const geocodeData = await axios.get(`${process.env.GEOCODING_URL}/search?name=${params.city}&count=1&language=en&format=json`)
         let newLocation;
@@ -80,6 +92,12 @@ exports.getAllRoomsForLocation = async (req, res) => {
 
 exports.deleteLocation = async (req, res) => {
     try {
+        const { role } = req.user
+
+        if (role !== "admin") {
+            return res.status(403).json({ message: "Forbidden: Insufficient permissions" });
+        }
+
         const id = new mongoose.Types.ObjectId(req.params.id);
         const location = await Location.findByIdAndDelete(id);
         if (!location) {

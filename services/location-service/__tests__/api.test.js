@@ -2,10 +2,12 @@ const request = require("supertest");
 const app = require("../app");
 const axios = require("axios");
 const Location = require("../models/Location");
+const { generateToken } = require("../../booking-service/test_helpers/helpers");
+const token = generateToken({ role: "admin" });
 
 jest.mock("axios")
 
-describe("Location Server", () => {
+describe("Location Service", () => {
     it("Should return all locations on request", async () => {
         await Location.create({
             name: "Dundee",
@@ -43,6 +45,7 @@ describe("Location Server", () => {
         const res = await request(app)
             .post("/api/locations")
             .send(locationData)
+            .set("Authorization", `Bearer ${token}`)
 
         expect(res.statusCode).toEqual(201);
         expect(res.body.location).toBeDefined();
@@ -68,6 +71,7 @@ describe("Location Server", () => {
     })
 
     it("Should allow for existing locations to be edited", async () => {
+
         const location = await Location.create({
             name: "Dundee",
             address: "94 Fintry Road",
@@ -78,13 +82,32 @@ describe("Location Server", () => {
 
         const res = await request(app)
             .put(`/api/locations/${location._id}`)
+            .set("Authorization", `Bearer ${token}`)
             .send({
                 name: "Scumdee"
             })
 
-        console.log(res);
-        
         expect(res.statusCode).toEqual(200)
         expect(res.body.location.name).toEqual("Scumdee")
+    })
+})
+
+
+describe("DELETE /id", () => {
+    it("Should delete a location when given valid ID", async () => {
+        const location = await Location.create({
+            name: "Dundee",
+            address: "94 Fintry Road",
+            city: "Dundee",
+            postcode: "DD4 9HQ",
+            country: "United Kingdom"
+        })
+
+        const deleteRes = await request(app)
+            .delete(`/api/locations/${location._id}`)
+            .set("Authorization", `Bearer ${token}`);
+
+        expect(deleteRes.statusCode).toEqual(200);
+        expect(deleteRes.body.message).toEqual(`Location with id: ${location._id} deleted`);
     })
 })
