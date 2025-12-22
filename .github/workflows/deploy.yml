@@ -100,32 +100,38 @@ jobs:
       - name: Setup SSH Key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          echo "${{ secrets.EC2_SSH_KEY }}" | sed 's/\r$//' > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
+          
+          # Debug: Check if key is valid
+          if ssh-keygen -y -f ~/.ssh/deploy_key > /dev/null 2>&1; then
+            echo "✓ SSH key is valid"
+          else
+            echo "✗ SSH key is INVALID"
+            echo "First line: $(head -n 1 ~/.ssh/deploy_key)"
+            echo "Last line: $(tail -n 1 ~/.ssh/deploy_key)"
+            exit 1
+          fi
+          
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-      
+
       - name: Deploy to EC2 via SSH
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
             set -e
             
-            # Login to ECR
             aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 449591255785.dkr.ecr.eu-west-1.amazonaws.com
             
-            # Pull latest image
             docker pull 449591255785.dkr.ecr.eu-west-1.amazonaws.com/frontend:latest
             
-            # Stop and remove old container
             docker stop frontend || true
             docker rm frontend || true
             
-            # Run new container
             docker run -d \
               --name frontend \
               -p 80:80 \
               --restart unless-stopped \
               449591255785.dkr.ecr.eu-west-1.amazonaws.com/frontend:latest
             
-            # Clean up old images
             docker image prune -af
           ENDSSH
