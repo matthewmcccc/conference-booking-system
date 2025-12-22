@@ -111,3 +111,24 @@ describe("DELETE /id", () => {
         expect(deleteRes.body.message).toEqual(`Location with id: ${location._id} deleted`);
     })
 })
+
+describe("GET /api/locations/:id/rooms", () => {
+    it("Should get all rooms for a location", async () => {
+        const location = await Location.create({
+            name: "Dundee",
+            address: "94 Fintry Road",
+            city: "Dundee",
+            postcode: "DD4 9HQ",
+            country: "United Kingdom"
+        })
+
+        axios.get.mockResolvedValueOnce({
+            data: []
+        });
+
+        const res = await request(app)
+            .get(`/api/locations/${location._id}/rooms`)
+            
+        expect(res.statusCode).toEqual(200);
+    })
+})
