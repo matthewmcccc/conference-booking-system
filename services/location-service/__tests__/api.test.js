@@ -2,7 +2,7 @@ const request = require("supertest");
 const app = require("../app");
 const axios = require("axios");
 const Location = require("../models/Location");
-const { generateToken } = require("../../booking-service/test_helpers/helpers");
+const { generateToken} = require("../test_helpers/helpers")
 const token = generateToken({ role: "admin" });
 
 jest.mock("axios")

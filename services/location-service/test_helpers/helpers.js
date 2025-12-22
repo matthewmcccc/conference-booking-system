@@ -15,3 +15,5 @@ const generateToken = (userData) => {
         { expiresIn: "1h" }
     )
 } 
+
+module.exports = { generateToken }
