@@ -1,4 +1,6 @@
 const jwt = require("jsonwebtoken");
+const request = require("supertest")
+const app = require("../app")
 const axios = require("axios");
 require("dotenv").config();
 
@@ -15,25 +17,48 @@ const generateToken = (userData) => {
 } 
 
 const setupBookingMocks = () => {
-    axios.get.mockResolvedValueOnce({
-        data: {
-            id: "693ebb3b894bc4f1c01d48fd",
-            name: "Conference Room A",
-            capacity: 20,
-            base_price: 100
+    axios.get.mockImplementation((url) => {
+        if (url.includes('/api/rooms/')) {
+            return Promise.resolve({
+                data: {
+                    id: "693ebb3b894bc4f1c01d48fd",
+                    name: "Conference Room A",
+                    capacity: 20,
+                    base_price: 100,
+                    location: "673ebb3b894bc4f1c01d48fd"
+                }
+            });
         }
-    });
-
-    axios.get.mockResolvedValueOnce({
-        data: { temperature: 15 }
-    });
-
-    axios.get.mockResolvedValueOnce({
-        data: {
-            latitude: 56.462,
-            longitude: -2.970
+        
+        if (url.includes('/api/weather')) {
+            return Promise.resolve({
+                data: { temperature: 15 }
+            });
         }
+        
+        if (url.includes('/api/locations/')) {
+            return Promise.resolve({
+                data: {
+                    latitude: 56.462,
+                    longitude: -2.970
+                }
+            });
+        }
+        
+        return Promise.reject(new Error(`Unmocked URL: ${url}`));
     });
 }
 
-module.exports = {generateToken, setupBookingMocks};
+const createMockBooking = async (token) => {
+    setupBookingMocks();
+    const bookingData = {
+        room: "693ebb3b894bc4f1c01d48fd",
+        date: new Date("2025-12-20")
+    };
+    return await request(app)
+        .post("/api/bookings")
+        .set("Authorization", `Bearer ${token}`)
+        .send(bookingData);
+}
+
+module.exports = {generateToken, setupBookingMocks, createMockBooking};
