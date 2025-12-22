@@ -20,15 +20,14 @@ exports.calculatePrice = async (req, res) => {
     try {
         const { roomId, date } = req.query;
 
+        if (!date || !roomId) {
+            return res.status(400).json({ message: "Date and roomID are required fields"})
+        }
+
         const roomData = await axios.get(`${process.env.ROOM_SERVICE_URL}/${roomId}`);
         const room = roomData.data;
 
         const url = `${process.env.WEATHER_SERVICE_URL}/forecast?locationId=${room.location}&date=${date}`
-
-        console.log('Weather service URL:', url); // ADD THIS
-        console.log('Room location:', room.location); // ADD THIS
-        console.log('Date:', date); // ADD THIS
-
 
         const weatherData = await axios.get(url);
         const weather = weatherData.data;
@@ -49,7 +48,7 @@ exports.calculatePrice = async (req, res) => {
 exports.createBooking = async (req, res) => {
     try {
         const { room: roomId, date } = req.body;
-        const { userId, role } = req.user;
+        const { userId } = req.user;
 
         const existingBooking = await Booking.findOne({ date: date, room: roomId });
 
@@ -97,6 +96,12 @@ exports.createBooking = async (req, res) => {
 
 exports.deleteBooking = async (req, res) => {
     try {
+        const { role } = req.user;
+        
+        if (role !== "admin") {
+            return res.status(403).json({ message: "You don't have permissions to do this action"})
+        };
+
         const id = new mongoose.Types.ObjectId(req.params.id);
         const booking = await Booking.findByIdAndDelete(id);
         if (!booking) {
@@ -111,6 +116,12 @@ exports.deleteBooking = async (req, res) => {
 
 exports.getBookingsForUser = async (req, res) => {
     try {
+        const { role } = req.user;
+
+        if (role !== "admin") {
+            return res.status(403).json({ message: "You don't have permissions to perform this action"})
+        }
+
         const userId = req.params.userid;
         const bookings = await Booking.find({ user: userId });
         if (bookings) {

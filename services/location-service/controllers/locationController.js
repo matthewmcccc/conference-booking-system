@@ -29,6 +29,12 @@ exports.getLocationById = async (req, res) => {
 
 exports.editLocationById = async (req, res) => {
     try {
+        const { role } = req.user;
+
+        if (role !== "admin") {
+            return res.status(403).json({ message: "Forbidden: Insufficient permissions" });
+        }
+
         const id = new mongoose.Types.ObjectId(req.params.id);
         const location = await Location.findOneAndUpdate(id, req.body, {new: true});
         if (location) {
@@ -43,6 +49,12 @@ exports.editLocationById = async (req, res) => {
 
 exports.createNewLocation = async (req, res) => {
     try {
+        const { role } = req.user;
+
+        if (role !== "admin") {
+            return res.status(403).json({ message: "Forbidden: Insufficient permissions" });
+        }
+
         const params = req.body;
         const geocodeData = await axios.get(`${process.env.GEOCODING_URL}/search?name=${params.city}&count=1&language=en&format=json`)
         let newLocation;
@@ -64,11 +76,11 @@ exports.getAllRoomsForLocation = async (req, res) => {
     try {
         const locationId = new mongoose.Types.ObjectId(req.params.id);
         const url = `${process.env.ROOM_SERVICE_URL}?location=${locationId}`;
-        console.log('Calling room service at:', url); // ADD THIS
-        console.log('ROOM_SERVICE_URL env var:', process.env.ROOM_SERVICE_URL); // AND THIS
+        console.log('Calling room service at:', url);
+        console.log('ROOM_SERVICE_URL env var:', process.env.ROOM_SERVICE_URL);
         
         const rooms = await axios.get(url);
-        if (rooms.data.length == 0) {
+        if (!rooms) {
             return res.status(404).json("Couldn't fetch rooms for location")
         }
         res.status(200).json(rooms.data);
@@ -80,6 +92,12 @@ exports.getAllRoomsForLocation = async (req, res) => {
 
 exports.deleteLocation = async (req, res) => {
     try {
+        const { role } = req.user
+
+        if (role !== "admin") {
+            return res.status(403).json({ message: "Forbidden: Insufficient permissions" });
+        }
+
         const id = new mongoose.Types.ObjectId(req.params.id);
         const location = await Location.findByIdAndDelete(id);
         if (!location) {
