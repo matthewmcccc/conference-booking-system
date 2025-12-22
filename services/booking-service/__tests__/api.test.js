@@ -4,6 +4,9 @@ const { generateToken, setupBookingMocks, createMockBooking } = require("../test
 const axios = require("axios");
 const token = generateToken({ role: "admin" });
 
+process.env.ROOM_SERVICE_URL = "http://localhost:3001/api/rooms";
+process.env.WEATHER_SERVICE_URL = "http://localhost:3002/api/weather";
+
 jest.mock("axios");
 
 beforeEach(() => {
