@@ -97,35 +97,35 @@ jobs:
           docker tag frontend:latest $ECR_REGISTRY/frontend:latest
           docker push $ECR_REGISTRY/frontend:latest
 
-      - name: Debug SSH Key Format
+      - name: Setup SSH Key
         run: |
-          echo "First line:"
-          echo "${{ secrets.EC2_SSH_KEY }}" | head -n 1
-          echo ""
-          echo "Last line:"
-          echo "${{ secrets.EC2_SSH_KEY }}" | tail -n 1
-          echo ""
-          echo "Total lines:"
-          echo "${{ secrets.EC2_SSH_KEY }}" | wc -l
-
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+      
       - name: Deploy to EC2 via SSH
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-            host: ${{ secrets.EC2_HOST }}
-            username: ${{ secrets.EC2_USERNAME }}
-            key: ${{ secrets.EC2_SSH_KEY }}
-            script: |
-              aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 449591255785.dkr.ecr.eu-west-1.amazonaws.com
-
-              docker pull 449591255785.dkr.ecr.eu-west-1.amazonaws.com/frontend:latest
-
-              docker stop frontend || true
-              docker rm frontend || true
-
-              docker run -d \
-                --name frontend \
-                -p 80:80 \
-                --restart unless-stopped \
-                449591255785.dkr.ecr.eu-west-1.amazonaws.com/frontend:latest
-
-              docker image prune -af
+        run: |
+          ssh -i ~/.ssh/deploy_key ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
+            set -e
+            
+            # Login to ECR
+            aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 449591255785.dkr.ecr.eu-west-1.amazonaws.com
+            
+            # Pull latest image
+            docker pull 449591255785.dkr.ecr.eu-west-1.amazonaws.com/frontend:latest
+            
+            # Stop and remove old container
+            docker stop frontend || true
+            docker rm frontend || true
+            
+            # Run new container
+            docker run -d \
+              --name frontend \
+              -p 80:80 \
+              --restart unless-stopped \
+              449591255785.dkr.ecr.eu-west-1.amazonaws.com/frontend:latest
+            
+            # Clean up old images
+            docker image prune -af
+          ENDSSH
