@@ -97,6 +97,16 @@ jobs:
           docker tag frontend:latest $ECR_REGISTRY/frontend:latest
           docker push $ECR_REGISTRY/frontend:latest
 
+      - name: Verify secrets are loaded
+        run: |
+          echo "Checking if secrets are set..."
+          [ -n "${{ secrets.EC2_HOST }}" ] && echo "✓ EC2_HOST is set" || echo "✗ EC2_HOST is missing"
+          [ -n "${{ secrets.EC2_USERNAME }}" ] && echo "✓ EC2_USERNAME is set" || echo "✗ EC2_USERNAME is missing"
+          [ -n "${{ secrets.EC2_SSH_KEY }}" ] && echo "✓ EC2_SSH_KEY is set" || echo "✗ EC2_SSH_KEY is missing"
+          [ -n "${{ secrets.AWS_ACCESS_KEY_ID }}" ] && echo "✓ AWS_ACCESS_KEY_ID is set" || echo "✗ AWS_ACCESS_KEY_ID is missing"
+          [ -n "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ] && echo "✓ AWS_SECRET_ACCESS_KEY is set" || echo "✗ AWS_SECRET_ACCESS_KEY is missing"
+          [ -n "${{ secrets.JWT_SECRET }}" ] && echo "✓ JWT_SECRET is set" || echo "✗ JWT_SECRET is missing"
+
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
