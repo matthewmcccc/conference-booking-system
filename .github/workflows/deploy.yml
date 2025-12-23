@@ -30,6 +30,9 @@ jobs:
       frontend: ${{ steps.filter.outputs.frontend }}
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
       - uses: dorny/paths-filter@v2
         id: filter
         with:
@@ -52,44 +55,35 @@ jobs:
     name: Test ${{ matrix.service }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         service: [auth-service, weather-service, location-service, room-service, booking-service]
-    env:
-      AUTH_CHANGED: ${{ needs.changes.outputs.auth-service }}
-      WEATHER_CHANGED: ${{ needs.changes.outputs.weather-service }}
-      LOCATION_CHANGED: ${{ needs.changes.outputs.location-service }}
-      ROOM_CHANGED: ${{ needs.changes.outputs.room-service }}
-      BOOKING_CHANGED: ${{ needs.changes.outputs.booking-service }}
+
     steps:
-      - name: Check if service changed
-        id: check
+      - name: Decide if this service changed
+        id: changed
         run: |
-          SERVICE="${{ matrix.service }}"
-          VAR_NAME="${SERVICE^^}"
-          VAR_NAME="${VAR_NAME//-/_}_CHANGED"
-          CHANGED="${!VAR_NAME}"
-          echo "changed=$CHANGED" >> $GITHUB_OUTPUT
-          echo "Service: $SERVICE, Changed: $CHANGED"
+          echo "changed=${{ needs.changes.outputs[matrix.service] }}" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v3
-        if: steps.check.outputs.changed == 'true'
+        if: steps.changed.outputs.changed == 'true'
 
       - uses: actions/setup-node@v3
-        if: steps.check.outputs.changed == 'true'
+        if: steps.changed.outputs.changed == 'true'
         with:
           node-version: '20'
 
       - name: Install and test
-        if: steps.check.outputs.changed == 'true'
+        if: steps.changed.outputs.changed == 'true'
         run: |
           cd ./services/${{ matrix.service }}
-          npm install
+          npm ci
           npm test
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
       - name: Skip notification
-        if: steps.check.outputs.changed != 'true'
+        if: steps.changed.outputs.changed != 'true'
         run: echo "Skipping ${{ matrix.service }} - no changes detected"
 
   deploy-services:
@@ -98,46 +92,37 @@ jobs:
     needs: [changes, test-services]
     if: github.event_name == 'push'
     strategy:
+      fail-fast: false
       matrix:
         service: [auth-service, weather-service, location-service, room-service, booking-service]
-    env:
-      AUTH_CHANGED: ${{ needs.changes.outputs.auth-service }}
-      WEATHER_CHANGED: ${{ needs.changes.outputs.weather-service }}
-      LOCATION_CHANGED: ${{ needs.changes.outputs.location-service }}
-      ROOM_CHANGED: ${{ needs.changes.outputs.room-service }}
-      BOOKING_CHANGED: ${{ needs.changes.outputs.booking-service }}
+
     steps:
-      - name: Check if service changed
-        id: check
+      - name: Decide if this service changed
+        id: changed
         run: |
-          SERVICE="${{ matrix.service }}"
-          VAR_NAME="${SERVICE^^}"
-          VAR_NAME="${VAR_NAME//-/_}_CHANGED"
-          CHANGED="${!VAR_NAME}"
-          echo "changed=$CHANGED" >> $GITHUB_OUTPUT
-          echo "Service: $SERVICE, Changed: $CHANGED"
+          echo "changed=${{ needs.changes.outputs[matrix.service] }}" >> "$GITHUB_OUTPUT"
 
       - name: Skip notification
-        if: steps.check.outputs.changed != 'true'
+        if: steps.changed.outputs.changed != 'true'
         run: echo "Skipping ${{ matrix.service }} - no changes detected"
 
       - uses: actions/checkout@v3
-        if: steps.check.outputs.changed == 'true'
+        if: steps.changed.outputs.changed == 'true'
 
       - name: Configure AWS credentials
-        if: steps.check.outputs.changed == 'true'
+        if: steps.changed.outputs.changed == 'true'
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-1
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
-        if: steps.check.outputs.changed == 'true'
-        run: aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+        if: steps.changed.outputs.changed == 'true'
+        run: aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
 
       - name: Build and push
-        if: steps.check.outputs.changed == 'true'
+        if: steps.changed.outputs.changed == 'true'
         run: |
           cd services/${{ matrix.service }}
           docker build --platform linux/amd64 -t ${{ matrix.service }} .
@@ -145,13 +130,13 @@ jobs:
           docker push ${{ env.ECR_REGISTRY }}/${{ matrix.service }}:latest
 
       - name: Force ECS deployment
-        if: steps.check.outputs.changed == 'true'
+        if: steps.changed.outputs.changed == 'true'
         run: |
           aws ecs update-service \
             --cluster ${{ env.ECS_CLUSTER }} \
             --service ${{ matrix.service }} \
             --force-new-deployment \
-            --region eu-west-1
+            --region ${{ env.AWS_REGION }}
 
   deploy-frontend:
     name: Deploy Frontend
@@ -159,8 +144,7 @@ jobs:
     needs: [changes, deploy-services]
     if: github.event_name == 'push' && needs.changes.outputs.frontend == 'true'
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -170,8 +154,7 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
-        run: |
-          aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+        run: aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
 
       - name: Build and push frontend
         run: |
@@ -191,19 +174,10 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} << 'ENDSSH'
             set -e
-            
             aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 449591255785.dkr.ecr.eu-west-1.amazonaws.com
-            
             docker pull 449591255785.dkr.ecr.eu-west-1.amazonaws.com/frontend:latest
-            
             docker stop frontend || true
             docker rm frontend || true
-            
-            docker run -d \
-              --name frontend \
-              -p 80:80 \
-              --restart unless-stopped \
-              449591255785.dkr.ecr.eu-west-1.amazonaws.com/frontend:latest
-            
+            docker run -d --name frontend -p 80:80 --restart unless-stopped 449591255785.dkr.ecr.eu-west-1.amazonaws.com/frontend:latest
             docker image prune -af
           ENDSSH
