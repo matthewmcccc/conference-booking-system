@@ -118,10 +118,6 @@ exports.getBookingsForUser = async (req, res) => {
     try {
         const { role } = req.user;
 
-        if (role !== "admin") {
-            return res.status(403).json({ message: "You don't have permissions to perform this action"})
-        }
-
         const userId = req.params.userid;
         const bookings = await Booking.find({ user: userId });
         if (bookings) {
