@@ -87,7 +87,7 @@ exports.loginUser = async (req, res) => {
             { expiresIn: '24h' }
         )
 
-        console.log("test commit")
+        console.log("test commit 2")
 
         return res.status(200).json({
             message: "Login successful",
