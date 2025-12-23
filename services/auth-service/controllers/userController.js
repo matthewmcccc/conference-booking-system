@@ -23,7 +23,6 @@ exports.createUser = async (req, res) => {
     try {
         const { password: plaintextPassword, ...userData } = req.body;
         const passwordHash = await encryptPassword(plaintextPassword);
-        console.log(passwordHash);
         const user = await User.create({ ...userData, passwordHash });
 
         const userResponse = user.toObject();
