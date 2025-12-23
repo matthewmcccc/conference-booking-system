@@ -49,8 +49,7 @@ exports.getWeatherData = async (req, res) => {
             
             res.json({
                 date: date,
-                temperature: avgTemp ? Math.round(avgTemp * 10) / 10 : null,
-                hourlyCount: temperatures.length
+                temperature: avgTemp ? Math.round(avgTemp * 10) / 10 : null
             });
         }
     } catch (err) {
