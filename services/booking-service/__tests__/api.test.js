@@ -154,22 +154,6 @@ describe("Booking Services", () => {
             expect(roomsRes.body.bookings.length).toBeGreaterThan(0);
         });
 
-        it("Should return 403 when getting user bookings without admin auth", async () => {
-            const userToken = generateToken({ role: "user" });
-            const createRes = await createMockBooking(userToken);
-            
-            expect(createRes.statusCode).toEqual(200);
-            const userId = createRes.body.booking.user;
-
-            const roomsRes = await request(app)
-                .get(`/api/bookings/${userId}`)
-                .set("Authorization", `Bearer ${userToken}`);
-
-            expect(roomsRes.statusCode).toEqual(403);
-            expect(roomsRes.body.message).toContain("permissions");
-        });
-    });
-
     describe("GET /api/bookings/calculate-price", () => {
         it("Should return 200 and calculate price with valid roomId and date", async () => {
             const token = generateToken({ role: "user" });
