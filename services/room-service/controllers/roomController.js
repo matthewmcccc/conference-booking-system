@@ -105,6 +105,8 @@ exports.deleteRoomByLocationId = async (req, res) => {
         console.error(`Couldn't delete rooms by location: ${err}`);
         res.status(500).json({ error: error.message })
     }
+
+    console.log("Test commit")
 }
 
 exports.health = async (req, res) => {

@@ -126,6 +126,8 @@ exports.getBookingsForUser = async (req, res) => {
         console.error(`Couldn't fetch bookings for user: ${error}`);
         return res.status(400).json({ message: error.message });
     }
+
+    console.log("Test commit")
 }
 
 exports.health = async (req, res) => {
