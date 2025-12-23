@@ -153,6 +153,7 @@ describe("Booking Services", () => {
             expect(Array.isArray(roomsRes.body.bookings)).toBe(true);
             expect(roomsRes.body.bookings.length).toBeGreaterThan(0);
         });
+    });
 
     describe("GET /api/bookings/calculate-price", () => {
         it("Should return 200 and calculate price with valid roomId and date", async () => {
