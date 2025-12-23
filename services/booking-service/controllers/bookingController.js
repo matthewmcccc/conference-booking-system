@@ -116,8 +116,6 @@ exports.deleteBooking = async (req, res) => {
 
 exports.getBookingsForUser = async (req, res) => {
     try {
-        const { role } = req.user;
-
         const userId = req.params.userid;
         const bookings = await Booking.find({ user: userId });
         if (bookings) {
