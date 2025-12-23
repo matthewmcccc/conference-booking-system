@@ -53,38 +53,44 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-          - service: auth-service
-            changed: ${{ needs.changes.outputs.auth-service }}
-          - service: weather-service
-            changed: ${{ needs.changes.outputs.weather-service }}
-          - service: location-service
-            changed: ${{ needs.changes.outputs.location-service }}
-          - service: room-service
-            changed: ${{ needs.changes.outputs.room-service }}
-          - service: booking-service
-            changed: ${{ needs.changes.outputs.booking-service }}
+        service: [auth-service, weather-service, location-service, room-service, booking-service]
+    env:
+      AUTH_CHANGED: ${{ needs.changes.outputs.auth-service }}
+      WEATHER_CHANGED: ${{ needs.changes.outputs.weather-service }}
+      LOCATION_CHANGED: ${{ needs.changes.outputs.location-service }}
+      ROOM_CHANGED: ${{ needs.changes.outputs.room-service }}
+      BOOKING_CHANGED: ${{ needs.changes.outputs.booking-service }}
     steps:
-      - name: Skip if unchanged
-        if: matrix.changed != 'true'
-        run: echo "Skipping ${{ matrix.service }} - no changes detected"
-      
+      - name: Check if service changed
+        id: check
+        run: |
+          SERVICE="${{ matrix.service }}"
+          VAR_NAME="${SERVICE^^}"
+          VAR_NAME="${VAR_NAME//-/_}_CHANGED"
+          CHANGED="${!VAR_NAME}"
+          echo "changed=$CHANGED" >> $GITHUB_OUTPUT
+          echo "Service: $SERVICE, Changed: $CHANGED"
+
       - uses: actions/checkout@v3
-        if: matrix.changed == 'true'
-      
+        if: steps.check.outputs.changed == 'true'
+
       - uses: actions/setup-node@v3
-        if: matrix.changed == 'true'
+        if: steps.check.outputs.changed == 'true'
         with:
           node-version: '20'
-      
+
       - name: Install and test
-        if: matrix.changed == 'true'
+        if: steps.check.outputs.changed == 'true'
         run: |
           cd ./services/${{ matrix.service }}
           npm install
           npm test
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
+      - name: Skip notification
+        if: steps.check.outputs.changed != 'true'
+        run: echo "Skipping ${{ matrix.service }} - no changes detected"
 
   deploy-services:
     name: Deploy ${{ matrix.service }}
@@ -93,47 +99,53 @@ jobs:
     if: github.event_name == 'push'
     strategy:
       matrix:
-        include:
-          - service: auth-service
-            changed: ${{ needs.changes.outputs.auth-service }}
-          - service: weather-service
-            changed: ${{ needs.changes.outputs.weather-service }}
-          - service: location-service
-            changed: ${{ needs.changes.outputs.location-service }}
-          - service: room-service
-            changed: ${{ needs.changes.outputs.room-service }}
-          - service: booking-service
-            changed: ${{ needs.changes.outputs.booking-service }}
+        service: [auth-service, weather-service, location-service, room-service, booking-service]
+    env:
+      AUTH_CHANGED: ${{ needs.changes.outputs.auth-service }}
+      WEATHER_CHANGED: ${{ needs.changes.outputs.weather-service }}
+      LOCATION_CHANGED: ${{ needs.changes.outputs.location-service }}
+      ROOM_CHANGED: ${{ needs.changes.outputs.room-service }}
+      BOOKING_CHANGED: ${{ needs.changes.outputs.booking-service }}
     steps:
-      - name: Skip if unchanged
-        if: matrix.changed != 'true'
+      - name: Check if service changed
+        id: check
+        run: |
+          SERVICE="${{ matrix.service }}"
+          VAR_NAME="${SERVICE^^}"
+          VAR_NAME="${VAR_NAME//-/_}_CHANGED"
+          CHANGED="${!VAR_NAME}"
+          echo "changed=$CHANGED" >> $GITHUB_OUTPUT
+          echo "Service: $SERVICE, Changed: $CHANGED"
+
+      - name: Skip notification
+        if: steps.check.outputs.changed != 'true'
         run: echo "Skipping ${{ matrix.service }} - no changes detected"
-      
+
       - uses: actions/checkout@v3
-        if: matrix.changed == 'true'
-      
+        if: steps.check.outputs.changed == 'true'
+
       - name: Configure AWS credentials
-        if: matrix.changed == 'true'
+        if: steps.check.outputs.changed == 'true'
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-1
-      
+
       - name: Login to Amazon ECR
-        if: matrix.changed == 'true'
+        if: steps.check.outputs.changed == 'true'
         run: aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
-      
+
       - name: Build and push
-        if: matrix.changed == 'true'
+        if: steps.check.outputs.changed == 'true'
         run: |
           cd services/${{ matrix.service }}
           docker build --platform linux/amd64 -t ${{ matrix.service }} .
           docker tag ${{ matrix.service }}:latest ${{ env.ECR_REGISTRY }}/${{ matrix.service }}:latest
           docker push ${{ env.ECR_REGISTRY }}/${{ matrix.service }}:latest
-      
+
       - name: Force ECS deployment
-        if: matrix.changed == 'true'
+        if: steps.check.outputs.changed == 'true'
         run: |
           aws ecs update-service \
             --cluster ${{ env.ECS_CLUSTER }} \
