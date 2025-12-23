@@ -3,6 +3,9 @@ name: Deploy to ECS
 on:
   push:
     branches: ['main']
+    paths:
+      - 'services/**'
+      - 'frontend/**'
   pull_request:
     branches: ['main']
 
@@ -10,68 +13,143 @@ env:
   AWS_REGION: eu-west-1
   ECR_REGISTRY: 449591255785.dkr.ecr.eu-west-1.amazonaws.com
   ECS_CLUSTER: conference-booking-cluster
+
 permissions:
   id-token: write
   contents: read
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      auth-service: ${{ steps.filter.outputs.auth-service }}
+      weather-service: ${{ steps.filter.outputs.weather-service }}
+      location-service: ${{ steps.filter.outputs.location-service }}
+      room-service: ${{ steps.filter.outputs.room-service }}
+      booking-service: ${{ steps.filter.outputs.booking-service }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            auth-service:
+              - 'services/auth-service/**'
+            weather-service:
+              - 'services/weather-service/**'
+            location-service:
+              - 'services/location-service/**'
+            room-service:
+              - 'services/room-service/**'
+            booking-service:
+              - 'services/booking-service/**'
+            frontend:
+              - 'frontend/**'
+
   test-services:
-    name: Test Services
+    needs: changes
+    name: Test ${{ matrix.service }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [weather-service, location-service, booking-service, room-service, auth-service]
+        include:
+          - service: auth-service
+            changed: ${{ needs.changes.outputs.auth-service }}
+          - service: weather-service
+            changed: ${{ needs.changes.outputs.weather-service }}
+          - service: location-service
+            changed: ${{ needs.changes.outputs.location-service }}
+          - service: room-service
+            changed: ${{ needs.changes.outputs.room-service }}
+          - service: booking-service
+            changed: ${{ needs.changes.outputs.booking-service }}
     steps:
+      - name: Skip if unchanged
+        if: matrix.changed != 'true'
+        run: echo "Skipping ${{ matrix.service }} - no changes detected"
+      
       - uses: actions/checkout@v3
+        if: matrix.changed == 'true'
+      
       - uses: actions/setup-node@v3
+        if: matrix.changed == 'true'
         with:
           node-version: '20'
-      - run: cd ./services/${{ matrix.service }} && npm install
-      - run: cd ./services/${{ matrix.service }} && npm test
+      
+      - name: Install and test
+        if: matrix.changed == 'true'
+        run: |
+          cd ./services/${{ matrix.service }}
+          npm install
+          npm test
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
   deploy-services:
-    name: Deploy Services
+    name: Deploy ${{ matrix.service }}
     runs-on: ubuntu-latest
-    needs: [test-services]
+    needs: [changes, test-services]
     if: github.event_name == 'push'
     strategy:
       matrix:
-        service: [weather-service, location-service, booking-service, room-service, auth-service]
+        include:
+          - service: auth-service
+            changed: ${{ needs.changes.outputs.auth-service }}
+          - service: weather-service
+            changed: ${{ needs.changes.outputs.weather-service }}
+          - service: location-service
+            changed: ${{ needs.changes.outputs.location-service }}
+          - service: room-service
+            changed: ${{ needs.changes.outputs.room-service }}
+          - service: booking-service
+            changed: ${{ needs.changes.outputs.booking-service }}
     steps:
+      - name: Skip if unchanged
+        if: matrix.changed != 'true'
+        run: echo "Skipping ${{ matrix.service }} - no changes detected"
+      
       - uses: actions/checkout@v3
+        if: matrix.changed == 'true'
+      
       - name: Configure AWS credentials
+        if: matrix.changed == 'true'
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: eu-west-1
+      
       - name: Login to Amazon ECR
-        run: aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin 449591255785.dkr.ecr.eu-west-1.amazonaws.com
+        if: matrix.changed == 'true'
+        run: aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+      
       - name: Build and push
+        if: matrix.changed == 'true'
         run: |
           cd services/${{ matrix.service }}
           docker build --platform linux/amd64 -t ${{ matrix.service }} .
-          docker tag ${{ matrix.service }}:latest 449591255785.dkr.ecr.eu-west-1.amazonaws.com/${{ matrix.service }}:latest
-          docker push 449591255785.dkr.ecr.eu-west-1.amazonaws.com/${{ matrix.service }}:latest
+          docker tag ${{ matrix.service }}:latest ${{ env.ECR_REGISTRY }}/${{ matrix.service }}:latest
+          docker push ${{ env.ECR_REGISTRY }}/${{ matrix.service }}:latest
+      
       - name: Force ECS deployment
+        if: matrix.changed == 'true'
         run: |
           aws ecs update-service \
-            --cluster conference-booking-cluster \
+            --cluster ${{ env.ECS_CLUSTER }} \
             --service ${{ matrix.service }} \
             --force-new-deployment \
             --region eu-west-1
-  
+
   deploy-frontend:
     name: Deploy Frontend
     runs-on: ubuntu-latest
-    needs: [deploy-services]
-
+    needs: [changes, deploy-services]
+    if: github.event_name == 'push' && needs.changes.outputs.frontend == 'true'
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
-      
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -81,14 +159,14 @@ jobs:
 
       - name: Login to Amazon ECR
         run: |
-          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
-        
+          aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+
       - name: Build and push frontend
         run: |
           cd frontend
           docker build --platform linux/amd64 -t frontend .
-          docker tag frontend:latest $ECR_REGISTRY/frontend:latest
-          docker push $ECR_REGISTRY/frontend:latest
+          docker tag frontend:latest ${{ env.ECR_REGISTRY }}/frontend:latest
+          docker push ${{ env.ECR_REGISTRY }}/frontend:latest
 
       - name: Setup SSH Key
         run: |
