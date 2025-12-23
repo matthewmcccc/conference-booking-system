@@ -88,6 +88,8 @@ exports.getAllRoomsForLocation = async (req, res) => {
         res.status(400).json({ error: err.message });
         console.error(`Couldn't fetch rooms for location: ${err}`);
     }
+
+    console.log("Test commit")
 }
 
 exports.deleteLocation = async (req, res) => {

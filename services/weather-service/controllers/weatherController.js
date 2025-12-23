@@ -52,6 +52,8 @@ exports.getWeatherData = async (req, res) => {
                 temperature: avgTemp ? Math.round(avgTemp * 10) / 10 : null
             });
         }
+
+        console.log('Weather data retrieval successful');
     } catch (err) {
         console.error(`Couldn't get weather data: ${err}`);
         res.status(400).json({ error: err.message });

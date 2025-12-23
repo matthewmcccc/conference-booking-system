@@ -100,6 +100,8 @@ exports.loginUser = async (req, res) => {
             }
         });
         
+        console.log("test commit ")
+
     } catch (error) {
         res.status(400).json(`Couldn't log in user: ${error}`);
         console.error(`Couldn't log in user: ${error}`);
