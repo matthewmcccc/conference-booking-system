@@ -4,11 +4,7 @@ const axios = require("axios");
 
 exports.getWeatherData = async (req, res) => {
     try {
-        console.log('FORECAST_API:', process.env.FORECAST_API); // ADD THIS
-        console.log('LOCATION_SERVICE_URL:', process.env.LOCATION_SERVICE_URL); // ADD THIS
-
         const { locationId, date } = req.query;
-        console.log("Request received at weather API");
         console.log(req.query);
         
         const locationData = await axios.get(`${process.env.LOCATION_SERVICE_URL}/${locationId}`);
