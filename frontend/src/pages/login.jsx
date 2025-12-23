@@ -15,13 +15,8 @@ export default function Login() {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        console.log('handleLogin called'); 
-        console.log('Email:', email, 'Password:', password); 
-        
         try {
-            console.log('About to call login...'); 
             await login(email, password);
-            console.log('Login successful'); 
             navigate('/');
         } catch (err) {
             console.error('Login error:', err); 

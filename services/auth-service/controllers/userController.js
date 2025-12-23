@@ -56,10 +56,6 @@ exports.deleteUser = async (req, res) => {
 }
 
 exports.loginUser = async (req, res) => {
-    console.log('=== LOGIN REQUEST RECEIVED ===');
-    console.log('Body:', req.body);
-    console.log('Headers:', req.headers);
-
     try {
         const { email, password } = req.body;
 
