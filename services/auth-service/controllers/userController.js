@@ -29,10 +29,16 @@ exports.createUser = async (req, res) => {
         const userResponse = user.toObject();
         delete userResponse.passwordHash;
 
+        const token = jwt.sign(
+        { userId: user._id, email: user.email },
+            process.env.JWT_SECRET,
+        { expiresIn: '7d' });
+
+
         if (!user) {
             res.status(404).json("Couldn't create suer")
         } else {
-            res.status(200).json({ message: "User created successfully", user: user });
+            res.status(200).json({ message: "User created successfully", token, user: user });
         }
     } catch (err) {
         console.error(`Couldn't create user: ${err}`);
